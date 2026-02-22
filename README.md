@@ -76,7 +76,7 @@ PBI_WORKSPACE_ID="id-do-seu-workspace-powerbi"
 ```
 
 ```bash
-git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
+git clone https://github.com/vinicius-virtuoso/Power-BI-Management-API.git
 cd seu-repositorio
 ```
 
