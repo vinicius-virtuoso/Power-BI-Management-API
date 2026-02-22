@@ -1,98 +1,129 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📊 Power BI Management API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+![Jest](https://img.shields.io/badge/-Jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> Solução robusta para gestão de acessos e visualização de relatórios do Power BI Embedded, com controle granular de permissões (RBAC).
 
-## Description
+----
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Funcionalidades
 
-## Project setup
+- **Gestão de Usuários**: Cadastro, atualização, ativação/desativação e controle de perfis (ADMIN/USER).
+- **Sincronização Automática**: Integração com a API do Power BI para importar relatórios de Workspaces dinamicamente.
+- **Controle de Acessos**: Vínculo inteligente entre usuários e relatórios (`Grant/Revoke`).
+- **Power BI Embedded**: Geração de `Embed Tokens` seguros e configurações de visualização (URL, DatasetId, etc).
+- **Segurança**: Autenticação via JWT, senhas criptografadas e proteção de rotas por nível de acesso.
 
-```bash
-$ npm install
+----
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Runtime:** Node.js v20+
+* **Framework:** NestJS (TypeScript)
+* **ORM:** Prisma
+* **Banco de Dados:** PostgreSQL
+* **Documentação:** Swagger (OpenAPI)
+* **Testes:** Jest & Supertest (Unitários e E2E)
+
+----
+
+## 📐 Arquitetura do Sistema
+
+O projeto utiliza os princípios de **Clean Architecture** e **Use Cases**, garantindo que a lógica de negócio seja independente de frameworks e fácil de testar.
+
+
+----
+
+## 📋 Pré-requisitos
+
+Antes de começar, você precisará de:
+* [Node.js](https://nodejs.org/) (v20 ou superior)
+* [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
+* Uma conta no **Azure** com Service Principal configurado para acesso ao Power BI.
+
+----
+
+## ⚙️ Configuração (Variáveis de Ambiente)
+
+Crie um arquivo `.env` na raiz do projeto e preencha conforme o exemplo:
+
+```env
+# Configurações do Banco de Dados
+DATABASE_URL="postgresql://admin:admin123@localhost:5432/powerbi_db?schema=public"
+
+# Segurança
+JWT_SECRET="sua_chave_secreta_super_segura"
+
+# Power BI / Azure Configuration
+PBI_CLIENT_ID="seu-client-id-azure"
+PBI_CLIENT_SECRET="seu-client-secret-azure"
+PBI_TENANT_ID="seu-tenant-id-azure"
+PBI_WORKSPACE_ID="id-do-seu-workspace-powerbi"
 ```
 
-## Compile and run the project
-
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
+cd seu-repositorio
 ```
 
-## Run tests
-
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker-compose up -d
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
 
-## Resources
+```bash
+npm run start:dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📖 Documentação da API (Swagger)
 
-## Support
+A API possui uma documentação interativa completa. Com o servidor rodando, acesse:
+👉 http://localhost:3000/api/docs
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Lá você encontrará todos os endpoints, modelos de dados (DTOs) e poderá testar as requisições em tempo real.
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🧪 Suíte de Testes
+Para garantir a qualidade, o projeto utiliza testes automatizados:
+```bash
+# Testes Unitários
+npm run test
 
-## License
+# Testes E2E (End-to-End)
+npm run test:e2e
+```
+Os testes E2E garantem o fluxo completo: desde a criação do usuário no banco até a validação do token JWT e permissões de acesso.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## 📂 Estrutura de Pastas
+```text
+src/
+├── modules/
+│   ├── users/        # Gestão de usuários e perfis
+│   ├── reports/      # Gestão de relatórios (Power BI e Sincronização)
+│   ├── user-reports/ # Lógica de vínculos N:N (Grant/Revoke)
+│   └── auth/         # Autenticação e emissão de JWT
+├── decorators/       # Decorators customizados para NestJS
+├── lib/              # Instâncias de serviços globais (Prisma Service)
+└── main.ts           # Inicialização e Swagger Config
+```
+---
+
+## 📄 Licença
+Não tem licença, mas use com moderação.
