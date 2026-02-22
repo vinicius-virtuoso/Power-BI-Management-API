@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PowerBiModule } from '../power-bi/power-bi.module';
 import { ReportsModule } from '../reports/reports.module';
 import { UsersModule } from '../users/users.module';
-import { InMemoryUserReportRepository } from './repositories/in-memory-user-report.repository';
+import { PrismaUserReportRepository } from './repositories/prisma-user-report.repository';
 import { ReportAccessService } from './service/report-access/report-access.service';
 import { CreateUserReportUseCase } from './use-case/create-user-report.usecase';
 import { DeleteUserReportUseCase } from './use-case/delete-user-report.usecase';
@@ -25,7 +25,7 @@ import { USER_REPORT_REPOSITORY } from './user-report.provider';
 
     {
       provide: USER_REPORT_REPOSITORY,
-      useClass: InMemoryUserReportRepository,
+      useClass: PrismaUserReportRepository,
     },
   ],
   exports: [USER_REPORT_REPOSITORY],

@@ -33,7 +33,7 @@ export class Report {
 
   static create(data: CreateReport): Report {
     return new Report(
-      null,
+      undefined,
       data.externalId,
       data.name,
       data.webUrl,

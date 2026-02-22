@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
 import type { UsersRepository } from '../users/repositories/users.repository';
@@ -29,19 +24,16 @@ export class AuthService {
 
   async login(data: AuthServiceProps): Promise<AuthServiceResponse> {
     const userFound = await this.usersRepository.findByEmail(data.email);
+    const passwordCompare = userFound
+      ? await compare(data.password, userFound.password)
+      : false;
 
-    if (!userFound) {
-      throw new NotFoundException('User not found');
+    if (!userFound || !passwordCompare) {
+      throw new UnauthorizedException('Invalids credentials');
     }
 
     if (!userFound.isActive) {
-      throw new UnauthorizedException('User inactive');
-    }
-
-    const passwordCompare = await compare(data.password, userFound.password);
-
-    if (!passwordCompare) {
-      throw new UnauthorizedException('Invalids credentials');
+      throw new UnauthorizedException('Access denied');
     }
 
     const payload = {

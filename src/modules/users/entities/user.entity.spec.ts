@@ -11,7 +11,7 @@ describe('User Entity', () => {
     });
 
     expect(user.isActive).toBe(true);
-    expect(user.id).toBeNull();
+    expect(user.id).toBeUndefined();
     expect(user.email).toBe('test@email.com');
     expect(user.lastAccess).toBeNull();
   });

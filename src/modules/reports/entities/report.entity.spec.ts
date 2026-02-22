@@ -14,7 +14,7 @@ describe('Report Entity', () => {
   it('deve criar um report com create', () => {
     const report = Report.create(reportData);
 
-    expect(report.id).toBeNull();
+    expect(report.id).toBeUndefined();
     expect(report.externalId).toBe(reportData.externalId);
     expect(report.name).toBe(reportData.name);
     expect(report.isActive).toBe(true);

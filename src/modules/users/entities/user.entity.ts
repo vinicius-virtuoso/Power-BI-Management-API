@@ -1,6 +1,6 @@
 type UserRole = 'ADMIN' | 'USER';
 
-type UserCreate = {
+export type UserCreate = {
   email: string;
   name: string;
   password: string;
@@ -36,7 +36,7 @@ export class User {
 
   static create(data: UserCreate): User {
     return new User(
-      null,
+      undefined,
       data.email,
       data.name,
       data.password,

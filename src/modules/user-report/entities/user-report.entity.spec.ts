@@ -7,7 +7,7 @@ describe('UserReport Entity', () => {
       reportId: 'report-1',
     });
 
-    expect(userReport.id).toBeNull();
+    expect(userReport.id).toBeUndefined();
     expect(userReport.userId).toBe('user-1');
     expect(userReport.reportId).toBe('report-1');
   });

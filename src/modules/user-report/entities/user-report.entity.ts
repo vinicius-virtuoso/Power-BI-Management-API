@@ -17,7 +17,7 @@ export class UserReport {
   ) {}
 
   static create(data: UserReportCreate): UserReport {
-    return new UserReport(null, data.userId, data.reportId);
+    return new UserReport(undefined, data.userId, data.reportId);
   }
 
   static fromPersistence(data: {

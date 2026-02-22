@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserLifecycleJob } from './jobs/user-lifecycle.job';
-import { InMemoryUsersRepository } from './repositories/in-memory-users.repository';
+import { PrismaUsersRepository } from './repositories/prisma-users.repository';
 import { AdminSeed } from './seeds/admin.seed';
 import { ActivateUserUseCase } from './use-cases/activate-user.usecase';
 import { CreateUserUseCase } from './use-cases/create-user.usecase';
@@ -26,7 +26,7 @@ import { USERS_REPOSITORY } from './users.providers';
     DeleteUserUseCase,
     {
       provide: USERS_REPOSITORY,
-      useClass: InMemoryUsersRepository,
+      useClass: PrismaUsersRepository,
     },
   ],
   exports: [USERS_REPOSITORY],
