@@ -20,6 +20,16 @@
 
 ----
 
+## 🛡️ Governança de Dados (User Lifecycle)
+
+O sistema possui um motor de automação (`Cron Job`) para garantir a higiene e segurança dos dados, gerenciando o ciclo de vida dos usuários automaticamente:
+
+- **Desativação Automática**: Usuários inativos há mais de **30 dias** são marcados como inativos automaticamente, perdendo acesso ao portal.
+- **Exclusão de Dados**: Usuários inativos há mais de **60 dias** são removidos permanentemente do banco de dados (compliance com políticas de retenção).
+- **Execução**: O Job é processado a cada 3 dias, às 03:00 da manhã, garantindo baixo impacto na performance do sistema.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 * **Runtime:** Node.js v20+
