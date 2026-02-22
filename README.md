@@ -62,22 +62,35 @@ Antes de começar, você precisará de:
 Crie um arquivo `.env` na raiz do projeto e preencha conforme o exemplo:
 
 ```env
-# Configurações do Banco de Dados
-DATABASE_URL="postgresql://admin:admin123@localhost:5432/powerbi_db?schema=public"
+PORT=3000
+
+# Azure Configuration
+AZURE_TENANT_ID=
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+
+# Power BI API Configuration
+POWER_BI_SCOPE=[https://analysis.windows.net/powerbi/api/.default](https://analysis.windows.net/powerbi/api/.default)
+POWER_BI_GRANT_TYPE=client_credentials
+POWER_BI_API_URL=[https://api.powerbi.com/v1.0/myorg](https://api.powerbi.com/v1.0/myorg)
+POWER_BI_WORKSPACE_ID=
 
 # Segurança
-JWT_SECRET="sua_chave_secreta_super_segura"
+SECRET_JWT=sua_chave_secreta
 
-# Power BI / Azure Configuration
-PBI_CLIENT_ID="seu-client-id-azure"
-PBI_CLIENT_SECRET="seu-client-secret-azure"
-PBI_TENANT_ID="seu-tenant-id-azure"
-PBI_WORKSPACE_ID="id-do-seu-workspace-powerbi"
+# Seed & Admin Initial Setup
+RUN_SEEDS=true
+ADMIN_EMAIL=admin@empresa.com
+ADMIN_PASSWORD=senha_forte
+ADMIN_NAME=Administrador
+
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/powerbi_db"
 ```
 
 ```bash
 git clone https://github.com/vinicius-virtuoso/Power-BI-Management-API.git
-cd seu-repositorio
+cd Power-BI-Management-API
 ```
 
 ```bash
