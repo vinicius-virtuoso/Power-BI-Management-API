@@ -47,7 +47,7 @@ export class PowerBiGateway implements PowerBiRepository {
       webUrl: report.webUrl,
       embedUrl: report.embedUrl,
       datasetId: report.datasetId,
-      workspaceId: report.workspaceId,
+      workspaceId: report.datasetWorkspaceId,
     }));
   }
 

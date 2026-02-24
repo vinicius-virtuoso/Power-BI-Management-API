@@ -4,7 +4,7 @@ export interface PowerBiReport {
   webUrl: string;
   embedUrl: string;
   datasetId: string;
-  workspaceId: string;
+  datasetWorkspaceId: string;
 }
 
 export interface PowerBiReportResponse {
