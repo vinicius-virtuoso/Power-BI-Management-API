@@ -12,10 +12,10 @@ import { UsersModule } from './modules/users/users.module';
   imports: [
     PrismaModule,
     ScheduleModule.forRoot(),
+    AuthModule,
     UsersModule,
     ReportsModule,
     UserReportModule,
-    AuthModule,
   ],
   controllers: [],
   providers: [
