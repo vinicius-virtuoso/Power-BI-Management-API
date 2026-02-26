@@ -115,7 +115,7 @@ npm run start:dev
 ## 📖 Documentação da API (Swagger)
 
 A API possui uma documentação interativa completa. Com o servidor rodando, acesse:
-👉 http://localhost:3000/api/docs
+👉 [http://localhost:3000/api/docs](https://power-bi-management-api.onrender.com/api)
 
 Lá você encontrará todos os endpoints, modelos de dados (DTOs) e poderá testar as requisições em tempo real.
 
