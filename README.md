@@ -30,6 +30,15 @@ O sistema possui um motor de automação (`Cron Job`) para garantir a higiene e 
 
 ---
 
+## 📖 Documentação da API (Swagger)
+
+A API possui uma documentação interativa completa. Com o servidor rodando, acesse:
+👉 [Link da Documentação](https://power-bi-management-api.onrender.com/api)
+
+Lá você encontrará todos os endpoints, modelos de dados (DTOs) e poderá testar as requisições em tempo real.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 * **Runtime:** Node.js v20+
@@ -109,17 +118,6 @@ npx prisma generate
 ```bash
 npm run start:dev
 ```
-
----
-
-## 📖 Documentação da API (Swagger)
-
-A API possui uma documentação interativa completa. Com o servidor rodando, acesse:
-👉 [Link da Documentação](https://power-bi-management-api.onrender.com/api)
-
-Lá você encontrará todos os endpoints, modelos de dados (DTOs) e poderá testar as requisições em tempo real.
-
----
 
 ## 🧪 Suíte de Testes
 Para garantir a qualidade, o projeto utiliza testes automatizados:
