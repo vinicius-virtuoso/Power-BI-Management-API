@@ -24,6 +24,7 @@ import { DeactivateUserUseCase } from './use-cases/deactivate-user.usecase';
 import { DeleteUserUseCase } from './use-cases/delete-user.usecase';
 import { FindAllUsersUseCase } from './use-cases/find-all-users.usecase';
 import { FindOneUserUseCase } from './use-cases/find-one-user.usecase';
+import { FindUserLoggedUseCase } from './use-cases/find-user-logged.usecase';
 import { UpdateUserUseCase } from './use-cases/update-user.usecase';
 
 export type LoggedUserProps = {
@@ -41,6 +42,7 @@ export type LoggedUserProps = {
 export class UsersController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
+    private readonly findUserLoggedUseCase: FindUserLoggedUseCase,
     private readonly findAllUsersUseCase: FindAllUsersUseCase,
     private readonly findOneUserUseCase: FindOneUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
@@ -61,6 +63,17 @@ export class UsersController {
     @UserRequest() loggedUser: LoggedUserProps,
   ) {
     return this.createUserUseCase.execute(createUserDto, loggedUser);
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Traz informações do usuário logado' })
+  @ApiResponse({ status: 200, description: '' })
+  @ApiResponse({
+    status: 403,
+    description: 'Proibido: Apenas administradores podem cadastrar usuários.',
+  })
+  findUserLogged(@UserRequest() loggedUser: LoggedUserProps) {
+    return this.findUserLoggedUseCase.execute(loggedUser);
   }
 
   @Get()

@@ -5,6 +5,7 @@ import { DeactivateUserUseCase } from './use-cases/deactivate-user.usecase';
 import { DeleteUserUseCase } from './use-cases/delete-user.usecase';
 import { FindAllUsersUseCase } from './use-cases/find-all-users.usecase';
 import { FindOneUserUseCase } from './use-cases/find-one-user.usecase';
+import { FindUserLoggedUseCase } from './use-cases/find-user-logged.usecase';
 import { UpdateUserUseCase } from './use-cases/update-user.usecase';
 import { UsersController } from './users.controller';
 
@@ -12,6 +13,7 @@ describe('UsersController', () => {
   let controller: UsersController;
 
   const createUserUseCase = { execute: jest.fn() };
+  const findUserLoggedUseCase = { execute: jest.fn() };
   const findAllUsersUseCase = { execute: jest.fn() };
   const findOneUserUseCase = { execute: jest.fn() };
   const updateUserUseCase = { execute: jest.fn() };
@@ -24,6 +26,7 @@ describe('UsersController', () => {
       controllers: [UsersController],
       providers: [
         { provide: CreateUserUseCase, useValue: createUserUseCase },
+        { provide: FindUserLoggedUseCase, useValue: findUserLoggedUseCase },
         { provide: FindAllUsersUseCase, useValue: findAllUsersUseCase },
         { provide: FindOneUserUseCase, useValue: findOneUserUseCase },
         { provide: UpdateUserUseCase, useValue: updateUserUseCase },

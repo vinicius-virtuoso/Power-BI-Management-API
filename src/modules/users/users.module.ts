@@ -8,6 +8,7 @@ import { DeactivateUserUseCase } from './use-cases/deactivate-user.usecase';
 import { DeleteUserUseCase } from './use-cases/delete-user.usecase';
 import { FindAllUsersUseCase } from './use-cases/find-all-users.usecase';
 import { FindOneUserUseCase } from './use-cases/find-one-user.usecase';
+import { FindUserLoggedUseCase } from './use-cases/find-user-logged.usecase';
 import { UpdateUserUseCase } from './use-cases/update-user.usecase';
 import { UsersController } from './users.controller';
 import { USERS_REPOSITORY } from './users.providers';
@@ -18,6 +19,7 @@ import { USERS_REPOSITORY } from './users.providers';
     AdminSeed,
     UserLifecycleJob,
     CreateUserUseCase,
+    FindUserLoggedUseCase,
     FindAllUsersUseCase,
     FindOneUserUseCase,
     UpdateUserUseCase,
