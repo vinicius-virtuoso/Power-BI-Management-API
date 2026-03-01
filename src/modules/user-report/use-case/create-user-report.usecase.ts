@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import { REPORTS_REPOSITORY } from '../../reports/reports.providers';
 import type { ReportsRepository } from '../../reports/repositories/reports.repository';
 import type { UsersRepository } from '../../users/repositories/users.repository';
@@ -11,11 +12,6 @@ import { USERS_REPOSITORY } from '../../users/users.providers';
 import type { UserReportView } from '../entities/user-report.entity';
 import type { UserReportRepository } from '../repositories/user-report.repository';
 import { USER_REPORT_REPOSITORY } from '../user-report.provider';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 export type UserReportProps = {
   userId: string;

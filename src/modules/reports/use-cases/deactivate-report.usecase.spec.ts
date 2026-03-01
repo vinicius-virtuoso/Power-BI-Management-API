@@ -3,12 +3,10 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import { Report } from '../entities/report.entity';
 import type { ReportsRepository } from '../repositories/reports.repository';
-import {
-  DeactivateReportUseCase,
-  LoggedUserProps,
-} from './deactivate-report.usecase';
+import { DeactivateReportUseCase } from './deactivate-report.usecase';
 
 describe('DeactivateReportUseCase', () => {
   let useCase: DeactivateReportUseCase;

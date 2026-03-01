@@ -8,13 +8,13 @@ export class InMemoryUsersRepository implements UsersRepository {
   async save(user: User): Promise<User> {
     const userPersisted = User.fromPersistence({
       id: randomUUID(),
+      createdAt: new Date(Date.now()),
       name: user.name,
       email: user.email,
       password: user.password,
       role: user.role,
       isActive: user.isActive,
       lastAccess: null,
-      createdAt: new Date(Date.now()),
       updatedAt: null,
     });
     this.users.push(userPersisted);

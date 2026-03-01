@@ -1,6 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
+import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { Report } from './entities/report.entity';
-import { LoggedUserProps, ReportsController } from './reports.controller';
+import { ReportsController } from './reports.controller';
 import { ActivateReportUseCase } from './use-cases/activate-report.usecase';
 import { DeactivateReportUseCase } from './use-cases/deactivate-report.usecase';
 import { SyncReportsPowerBIUseCase } from './use-cases/sync-reports-for-power-bi.use-case';

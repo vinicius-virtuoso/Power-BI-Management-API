@@ -5,15 +5,11 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { CreateUserDto } from '../dto/create-user.dto';
 import { User, type UserView } from '../entities/user.entity';
 import { USERS_REPOSITORY } from '../users.providers';
 import type { UsersRepository } from './../repositories/users.repository';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @Injectable()
 export class CreateUserUseCase {

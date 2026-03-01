@@ -1,9 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
+import type { LoggedUserProps } from '../shared/types/logged-user.types';
 
 export const UserRequest = createParamDecorator(
   (data: keyof any | undefined, ctx: ExecutionContext) => {

@@ -7,6 +7,8 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { UserReportModule } from './modules/user-report/user-report.module';
 import { UsersModule } from './modules/users/users.module';
+import { ScheduleReportsModule } from './modules/schedule-reports/schedule-reports.module';
+import { RefreshDatasetModule } from './modules/refresh-dataset/refresh-dataset.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     ReportsModule,
     UserReportModule,
+    ScheduleReportsModule,
+    RefreshDatasetModule,
   ],
   controllers: [],
   providers: [

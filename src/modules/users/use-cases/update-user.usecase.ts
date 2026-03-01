@@ -6,15 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { UpdateUserDto } from '../dto/update-user.dto';
 import type { User, UserView } from '../entities/user.entity';
 import type { UsersRepository } from '../repositories/users.repository';
 import { USERS_REPOSITORY } from '../users.providers';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @Injectable()
 export class UpdateUserUseCase {

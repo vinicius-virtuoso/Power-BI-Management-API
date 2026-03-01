@@ -17,6 +17,8 @@ export type ReportView = {
   datasetId: string;
   workspaceId: string;
   isActive: boolean;
+  lastUpdate: Date;
+  erros: string | null;
 };
 
 export class Report {
@@ -29,6 +31,8 @@ export class Report {
     public datasetId: string,
     public workspaceId: string,
     public isActive: boolean,
+    public lastUpdate?: Date | null,
+    public errors?: string | null,
   ) {}
 
   static create(data: CreateReport): Report {
@@ -41,6 +45,8 @@ export class Report {
       data.datasetId,
       data.workspaceId,
       data.isActive,
+      null,
+      null,
     );
   }
 
@@ -53,6 +59,8 @@ export class Report {
     datasetId: string;
     workspaceId: string;
     isActive: boolean;
+    lastUpdate?: Date | null;
+    errors?: string | null;
   }): Report {
     return new Report(
       data.id,
@@ -63,6 +71,23 @@ export class Report {
       data.datasetId,
       data.workspaceId,
       data.isActive,
+      data.lastUpdate,
+      data.errors,
+    );
+  }
+
+  lastUpdateEnd(lastUpdate: Date, erros: any): Report {
+    return new Report(
+      this.id,
+      this.externalId,
+      this.name,
+      this.webUrl,
+      this.embedUrl,
+      this.datasetId,
+      this.workspaceId,
+      this.isActive,
+      lastUpdate ?? this.lastUpdate,
+      erros ?? null,
     );
   }
 
@@ -76,6 +101,8 @@ export class Report {
       this.datasetId,
       this.workspaceId,
       false,
+      this.lastUpdate,
+      this.errors,
     );
   }
 
@@ -89,6 +116,8 @@ export class Report {
       this.datasetId,
       this.workspaceId,
       true,
+      this.lastUpdate,
+      this.errors,
     );
   }
 
@@ -102,6 +131,8 @@ export class Report {
       datasetId: this.datasetId,
       workspaceId: this.workspaceId,
       isActive: this.isActive,
+      lastUpdate: this.lastUpdate,
+      erros: this.errors ? JSON.parse(this.errors) : null,
     };
   }
 }

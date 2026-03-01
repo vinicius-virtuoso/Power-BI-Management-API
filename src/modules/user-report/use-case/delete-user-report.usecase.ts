@@ -5,13 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { UserReportRepository } from '../repositories/user-report.repository';
 import { USER_REPORT_REPOSITORY } from '../user-report.provider';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @Injectable()
 export class DeleteUserReportUseCase {

@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserRequest } from '../../decorators/user-request.decorator';
+import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ActivateUserUseCase } from './use-cases/activate-user.usecase';
@@ -27,13 +28,8 @@ import { FindOneUserUseCase } from './use-cases/find-one-user.usecase';
 import { FindUserLoggedUseCase } from './use-cases/find-user-logged.usecase';
 import { UpdateUserUseCase } from './use-cases/update-user.usecase';
 
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
-
 @ApiTags('Usuários')
-@ApiBearerAuth() // Exige o token para TODOS os métodos desta classe
+@ApiBearerAuth()
 @ApiResponse({
   status: 401,
   description: 'Não autorizado: Token ausente ou inválido.',

@@ -1,12 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { UserView } from '../entities/user.entity';
 import { USERS_REPOSITORY } from '../users.providers';
 import type { UsersRepository } from './../repositories/users.repository';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @Injectable()
 export class FindUserLoggedUseCase {

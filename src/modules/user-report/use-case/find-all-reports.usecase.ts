@@ -1,14 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import { type ReportView } from '../../reports/entities/report.entity';
 import { REPORTS_REPOSITORY } from '../../reports/reports.providers';
 import type { ReportsRepository } from '../../reports/repositories/reports.repository';
 import type { UserReportRepository } from '../repositories/user-report.repository';
 import { USER_REPORT_REPOSITORY } from '../user-report.provider';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 export type PaginatedResult = {
   total: number;
@@ -40,17 +36,18 @@ export class FindAllReportsUseCase {
 
       return {
         total: reports.length,
-        reports: reports.map((r) => r.toView()),
+        reports: reports
+          .map((r) => r.toView())
+          .filter((report) => report.isActive === true),
       };
     }
 
     const reportAll = await this.reportsRepository.findAll();
+    console.log(reportAll);
 
     return {
       total: reportAll.length,
-      reports: reportAll
-        .filter((report) => report.isActive)
-        .map((report) => report.toView()),
+      reports: reportAll.map((report) => report.toView()),
     };
   }
 }

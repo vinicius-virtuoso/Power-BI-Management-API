@@ -34,17 +34,20 @@ model User {
 }
 
 model Report {
-  id          String       @id @default(uuid())
-  externalId  String       @unique
-  name        String
-  webUrl      String
-  embedUrl    String
-  datasetId   String
-  workspaceId String
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime?    @updatedAt
-  users       UserReport[]
+  id              String            @id @default(uuid())
+  externalId      String            @unique
+  name            String
+  webUrl          String
+  embedUrl        String
+  datasetId       String
+  workspaceId     String
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime?         @updatedAt
+  lastUpdate      DateTime?
+  users           UserReport[]
+  scheduleReports ScheduleReports[]
+  errors          String?
 
   @@map("reports")
 }
@@ -59,4 +62,26 @@ model UserReport {
 
   @@unique([userId, reportId])
   @@map("user_reports")
+}
+
+model ScheduleReports {
+  id       String  @id @default(uuid())
+  reportId String  @unique // Um relatório deve ter apenas uma configuração de agendamento
+  isActive Boolean @default(true)
+
+  // Horários comuns (Ex: ["08", "12", "18"])
+  hoursCommon String[]
+
+  // Regras de fechamento
+  isClosingDays    Boolean  @default(false)
+  closingDays      String[] // Dias do mês (Ex: ["01", "05", "28"])
+  hoursClosingDays String[] // Horários específicos para esses dias
+
+  // Auditoria
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("schedule_reports")
 }

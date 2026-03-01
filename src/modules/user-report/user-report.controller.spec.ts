@@ -1,9 +1,9 @@
+import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateUserReportUseCase } from './use-case/create-user-report.usecase';
 import { DeleteUserReportUseCase } from './use-case/delete-user-report.usecase';
 import { FindAllReportsUseCase } from './use-case/find-all-reports.usecase';
 import { FindOneUserReportUseCase } from './use-case/find-one-user-report.usecase';
 import { GenerateTokenEmbedUseCase } from './use-case/generate-token-embed.usecase';
-import type { LoggedUserProps } from './user-report.controller';
 import { UserReportController } from './user-report.controller';
 
 describe('UserReportController', () => {

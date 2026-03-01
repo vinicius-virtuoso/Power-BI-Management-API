@@ -4,14 +4,10 @@ import {
   Inject,
   NotFoundException,
 } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { ReportView } from '../entities/report.entity';
 import { REPORTS_REPOSITORY } from '../reports.providers';
 import type { ReportsRepository } from './../repositories/reports.repository';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 export class ActivateReportUseCase {
   constructor(

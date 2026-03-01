@@ -1,13 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { PowerBiRepository } from '../../power-bi/power-bi.repository';
 import type { PowerBiEmbedTokenResponse } from '../../power-bi/power-bi.types';
 import { POWER_BI_REPOSITORY } from '../../reports/reports.providers';
 import { ReportAccessService } from '../service/report-access/report-access.service';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @Injectable()
 export class GenerateTokenEmbedUseCase {

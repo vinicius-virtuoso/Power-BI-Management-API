@@ -60,6 +60,8 @@ export class PrismaReportsRepository implements ReportsRepository {
           datasetId: report.datasetId,
           workspaceId: report.workspaceId,
           isActive: report.isActive,
+          lastUpdate: report.lastUpdate,
+          errors: report.errors,
         },
       });
 

@@ -1,4 +1,4 @@
-import { Controller, HttpCode, Param, Patch } from '@nestjs/common';
+import { Controller, Delete, HttpCode, Param, Patch } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -7,14 +7,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserRequest } from '../../decorators/user-request.decorator';
+import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { ActivateReportUseCase } from './use-cases/activate-report.usecase';
 import { DeactivateReportUseCase } from './use-cases/deactivate-report.usecase';
+import { DeleteReportUseCase } from './use-cases/delete-report.usecase';
 import { SyncReportsPowerBIUseCase } from './use-cases/sync-reports-for-power-bi.use-case';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @ApiTags('Gerenciamento de Relatórios (Admin)')
 @ApiBearerAuth()
@@ -32,6 +29,7 @@ export class ReportsController {
     private readonly syncReportsPowerBIUseCase: SyncReportsPowerBIUseCase,
     private readonly activateReportUseCase: ActivateReportUseCase,
     private readonly deactivateReportUseCase: DeactivateReportUseCase,
+    private readonly deleteReportUseCase: DeleteReportUseCase,
   ) {}
 
   @Patch('sync')
@@ -82,5 +80,14 @@ export class ReportsController {
     @UserRequest() loggedUser: LoggedUserProps,
   ) {
     return this.deactivateReportUseCase.execute(reportId, loggedUser);
+  }
+
+  @Delete(':reportId')
+  @HttpCode(204)
+  delete(
+    @Param('reportId') reportId: string,
+    @UserRequest() loggedUser: LoggedUserProps,
+  ) {
+    return this.deleteReportUseCase.execute(reportId, loggedUser);
   }
 }

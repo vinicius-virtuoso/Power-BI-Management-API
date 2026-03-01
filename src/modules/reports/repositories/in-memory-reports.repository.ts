@@ -15,6 +15,8 @@ export class InMemoryReportsRepository implements ReportsRepository {
       isActive: report.isActive,
       datasetId: report.datasetId,
       workspaceId: report.workspaceId,
+      lastUpdate: null,
+      errors: null,
     });
     this.reports.push(reportPersisted);
 

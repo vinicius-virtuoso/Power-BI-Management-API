@@ -71,4 +71,74 @@ export class PowerBiGateway implements PowerBiRepository {
       expiration: data.expiration,
     };
   }
+
+  async triggerDatasetRefresh(
+    token: string,
+    datasetId: string,
+  ): Promise<{ statusCode: number }> {
+    const url = `https://api.powerbi.com/v1.0/myorg/groups/${process.env.POWER_BI_WORKSPACE_ID}/datasets/${datasetId}/refreshes`;
+
+    try {
+      // O Axios retorna um objeto 'AxiosResponse' que contém a propriedade 'status'
+      const response = await firstValueFrom(
+        this.http.post(
+          url,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+      // No sucesso (geralmente 202 Accepted para o Power BI)
+      return {
+        statusCode: response.status,
+      };
+    } catch (error) {
+      // Se o erro veio da resposta da API (ex: 400, 401, 404)
+      if (error.response) {
+        return {
+          statusCode: error.response.status,
+        };
+      }
+
+      // Se for um erro de rede ou timeout (sem status code de servidor)
+      return {
+        statusCode: 500,
+      };
+    }
+  }
+
+  async getLatestRefreshStatus(token: string, datasetId: string) {
+    // Pegamos apenas o último item do histórico ($top=1)
+    const url = `https://api.powerbi.com/v1.0/myorg/groups/${process.env.POWER_BI_WORKSPACE_ID}/datasets/${datasetId}/refreshes?$top=1`;
+
+    const { data } = await firstValueFrom(
+      this.http.get<any>(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    );
+
+    const lastRefresh = data.value[0];
+
+    if (!lastRefresh) {
+      return { status: 'Unknown', error: null };
+    }
+
+    return {
+      status: lastRefresh.status, // 'Completed', 'Failed', 'InProgress'
+      startTime: lastRefresh.startTime,
+      endTime: lastRefresh.endTime,
+      // Se houver falha, o Power BI envia o detalhe em serviceExceptionJson
+      error:
+        lastRefresh.status === 'Failed'
+          ? lastRefresh.serviceExceptionJson
+          : null,
+    };
+  }
 }

@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserRequest } from '../../decorators/user-request.decorator';
+import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateUserReportDto } from './dto/create-user-report.dto';
 import { DeleteUserReportDto } from './dto/delete-user-report.dto';
 import { CreateUserReportUseCase } from './use-case/create-user-report.usecase';
@@ -22,11 +23,6 @@ import { DeleteUserReportUseCase } from './use-case/delete-user-report.usecase';
 import { FindAllReportsUseCase } from './use-case/find-all-reports.usecase';
 import { FindOneUserReportUseCase } from './use-case/find-one-user-report.usecase';
 import { GenerateTokenEmbedUseCase } from './use-case/generate-token-embed.usecase';
-
-export type LoggedUserProps = {
-  id: string;
-  role: 'USER' | 'ADMIN';
-};
 
 @ApiTags('Permissões e Relatórios')
 @ApiBearerAuth()
