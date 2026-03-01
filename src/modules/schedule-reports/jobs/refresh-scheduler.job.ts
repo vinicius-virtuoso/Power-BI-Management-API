@@ -74,6 +74,7 @@ export class RefreshSchedulerJob {
             role: 'ADMIN',
           });
         } catch (error) {
+          // logger
           this.logger.error(
             `Erro ao atualizar report ${schedule.reportId}:`,
             error.message,
