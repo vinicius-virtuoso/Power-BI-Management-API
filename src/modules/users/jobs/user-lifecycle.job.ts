@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import type { User } from '../entities/user.entity';
 import type { UsersRepository } from '../repositories/users.repository';
 import { USERS_REPOSITORY } from '../users.providers';
 
@@ -13,46 +14,45 @@ export class UserLifecycleJob {
   ) {}
 
   @Cron('* * 3 */3 * *', {
-    name: 'Horário de Brasilia',
+    name: 'Limpeza de Usuários',
     timeZone: 'America/Sao_Paulo',
-  }) // Vai rodar a cada 3 dias, as 03 da madrugada
+  })
   async handle() {
-    this.logger.log('Iniciando limpeza de usuários inativos...');
+    this.logger.log('Iniciando processamento de ciclo de vida de usuários...');
 
     const now = new Date();
+    const cutoff30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const cutoff60 = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    const cutoff30 = new Date(now);
-    cutoff30.setDate(now.getDate() - 30);
-
-    const cutoff60 = new Date(now);
-    cutoff60.setDate(now.getDate() - 60);
-
-    const inactiveUsers =
+    const candidates =
       await this.usersRepository.findUsersInactiveSince(cutoff30);
 
-    let deactivated = 0;
+    const toDeactivate: User[] = [];
+    const idsToDelete: string[] = [];
 
-    for (const user of inactiveUsers) {
-      if (!user.isActive) continue;
+    for (const user of candidates) {
+      if (!user.lastAccess) continue;
 
-      await this.usersRepository.deactivate(user.deactivate());
-      deactivated++;
+      const lastAccessTime = user.lastAccess.getTime();
+
+      if (lastAccessTime <= cutoff60.getTime() && !user.isActive) {
+        idsToDelete.push(user.id);
+        continue;
+      }
+
+      if (lastAccessTime <= cutoff30.getTime() && user.isActive) {
+        toDeactivate.push(user.deactivate());
+      }
     }
 
-    const expiredUsers =
-      await this.usersRepository.findUsersInactiveSince(cutoff60);
-
-    let deleted = 0;
-
-    for (const user of expiredUsers) {
-      if (user.isActive) continue;
-      if (!user.id) continue;
-
-      await this.usersRepository.delete(user.id);
-      deleted++;
+    if (toDeactivate.length > 0) {
+      await this.usersRepository.updateMany(toDeactivate);
+      this.logger.log(`${toDeactivate.length} usuários desativados em lote.`);
     }
 
-    this.logger.log(`Desativados: ${deactivated}`);
-    this.logger.log(`Deletados: ${deleted}`);
+    if (idsToDelete.length > 0) {
+      await this.usersRepository.deleteMany(idsToDelete);
+      this.logger.log(`${idsToDelete.length} usuários deletados em lote.`);
+    }
   }
 }

@@ -1,3 +1,11 @@
+export type AzureToken = {
+  access_token: string;
+};
+
+export type PowerBiStatusCode = {
+  statusCode: number;
+};
+
 export interface PowerBiReport {
   id: string;
   name: string;
@@ -20,11 +28,35 @@ export interface PowerBiListReports {
   value: PowerBiReport[];
 }
 
-export interface PowerBiListReportsResponse {
-  value: PowerBiReportResponse[];
-}
+export type PowerBiListReportsResponse = PowerBiListReports | PowerBiStatusCode;
 
-export interface PowerBiEmbedTokenResponse {
+export interface PowerBiEmbedToken {
   token: string;
   expiration: string;
 }
+
+export type PowerBiEmbedTokenResponse = PowerBiEmbedToken | PowerBiStatusCode;
+
+export interface GetPowerBiGetLatestRefreshStatus {
+  value: [
+    {
+      status: 'Completed' | 'Failed' | 'Disabled' | 'Unknown' | string;
+      serviceExceptionJson?: string | null;
+      startTime?: Date;
+      endTime?: Date;
+    },
+  ];
+}
+
+export interface PowerBiGetLatestRefreshStatus {
+  status: 'Completed' | 'Failed' | 'Disabled' | 'Unknown' | string;
+  error?: string | null;
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export type PowerBiGetLatestRefreshStatusResponse =
+  | PowerBiGetLatestRefreshStatus
+  | PowerBiStatusCode;
+
+export type AzureTokenResponse = AzureToken | PowerBiStatusCode;

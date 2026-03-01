@@ -7,24 +7,16 @@ import { User } from '../entities/user.entity';
 import type { UsersRepository } from '../repositories/users.repository';
 import { ActivateUserUseCase } from './activate-user.usecase';
 
-const makeUsersRepositoryMock = (): jest.Mocked<UsersRepository> => ({
-  save: jest.fn(),
-  findByEmail: jest.fn(),
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  activate: jest.fn(),
-  deactivate: jest.fn(),
-  findUsersInactiveSince: jest.fn(),
-});
-
 describe('ActivateUserUseCase', () => {
   let useCase: ActivateUserUseCase;
   let usersRepository: jest.Mocked<UsersRepository>;
 
   beforeEach(() => {
-    usersRepository = makeUsersRepositoryMock();
+    usersRepository = {
+      findById: jest.fn(),
+      activate: jest.fn(),
+    } as any;
+
     useCase = new ActivateUserUseCase(usersRepository);
   });
 
@@ -56,6 +48,8 @@ describe('ActivateUserUseCase', () => {
     expect(usersRepository.findById).toHaveBeenCalledWith('user-id');
     expect(usersRepository.activate).toHaveBeenCalledTimes(1);
     expect(result.isActive).toBe(true);
+    // Validação extra para garantir que a Entity gerou a data de atualização
+    expect(result.updatedAt).toBeInstanceOf(Date);
   });
 
   it('deve lançar ForbiddenException se o usuário logado não for ADMIN', async () => {
@@ -64,7 +58,7 @@ describe('ActivateUserUseCase', () => {
       role: 'USER' as const,
     };
 
-    await expect(useCase.execute('user-id', loggedUser)).rejects.toBeInstanceOf(
+    await expect(useCase.execute('user-id', loggedUser)).rejects.toThrow(
       ForbiddenException,
     );
 
@@ -79,14 +73,14 @@ describe('ActivateUserUseCase', () => {
 
     usersRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('user-id', loggedUser)).rejects.toBeInstanceOf(
-      NotFoundException,
+    await expect(useCase.execute('user-id', loggedUser)).rejects.toThrow(
+      new NotFoundException('User not found'),
     );
 
     expect(usersRepository.activate).not.toHaveBeenCalled();
   });
 
-  it('deve lançar BadRequestException se a ativação falhar', async () => {
+  it('deve lançar BadRequestException se a ativação falhar no repositório', async () => {
     const loggedUser = {
       id: 'admin-id',
       role: 'ADMIN' as const,
@@ -107,8 +101,8 @@ describe('ActivateUserUseCase', () => {
     usersRepository.findById.mockResolvedValue(inactiveUser);
     usersRepository.activate.mockResolvedValue(null as any);
 
-    await expect(useCase.execute('user-id', loggedUser)).rejects.toBeInstanceOf(
-      BadRequestException,
+    await expect(useCase.execute('user-id', loggedUser)).rejects.toThrow(
+      new BadRequestException('Error on activate user'),
     );
   });
 });

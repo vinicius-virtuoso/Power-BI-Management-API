@@ -31,24 +31,36 @@ export class RefreshDatasetReportUseCase {
 
     const reportFound = await this.reportsRepository.findById(reportId);
 
-    if (!reportFound || !reportFound.activate) {
+    if (!reportFound || !reportFound.isActive) {
       throw new NotFoundException('Report not found or inactive');
     }
 
     const powerBiToken = await this.powerBiRepository.authenticate();
 
-    if (!powerBiToken) {
-      throw new UnauthorizedException();
+    if ('statusCode' in powerBiToken) {
+      throw new UnauthorizedException(
+        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+      );
     }
 
     const refreshReport = await this.powerBiRepository.triggerDatasetRefresh(
-      powerBiToken,
+      powerBiToken.access_token,
       reportFound.datasetId,
     );
 
     if (refreshReport.statusCode === 400) {
       throw new BadRequestException(
         'Another refresh request is already executing',
+      );
+    }
+
+    if (refreshReport.statusCode === 404) {
+      throw new NotFoundException('Dataset not found in Power BI workspace');
+    }
+
+    if (refreshReport.statusCode >= 500) {
+      throw new BadRequestException(
+        'Power BI service is currently unavailable',
       );
     }
   }

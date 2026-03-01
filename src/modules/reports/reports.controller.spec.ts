@@ -4,6 +4,7 @@ import { Report } from './entities/report.entity';
 import { ReportsController } from './reports.controller';
 import { ActivateReportUseCase } from './use-cases/activate-report.usecase';
 import { DeactivateReportUseCase } from './use-cases/deactivate-report.usecase';
+import { DeleteReportUseCase } from './use-cases/delete-report.usecase';
 import { SyncReportsPowerBIUseCase } from './use-cases/sync-reports-for-power-bi.use-case';
 
 describe('ReportsController', () => {
@@ -11,6 +12,9 @@ describe('ReportsController', () => {
   let syncReportsUseCase: jest.Mocked<SyncReportsPowerBIUseCase>;
   let activateReportUseCase: jest.Mocked<ActivateReportUseCase>;
   let deactivateReportUseCase: jest.Mocked<DeactivateReportUseCase>;
+  let deleteReportUseCase: jest.Mocked<DeleteReportUseCase>;
+
+  const loggedUser: LoggedUserProps = { id: 'admin', role: 'ADMIN' };
 
   beforeEach(() => {
     syncReportsUseCase = {
@@ -25,15 +29,19 @@ describe('ReportsController', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<DeactivateReportUseCase>;
 
+    deleteReportUseCase = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<DeleteReportUseCase>;
+
     controller = new ReportsController(
       syncReportsUseCase,
       activateReportUseCase,
       deactivateReportUseCase,
+      deleteReportUseCase,
     );
   });
 
   it('deve chamar o use case de sincronização ao chamar create', async () => {
-    const loggedUser: LoggedUserProps = { id: 'admin', role: 'ADMIN' };
     const mockResult = { total: 2, reports: [] };
     syncReportsUseCase.execute.mockResolvedValue(mockResult);
 
@@ -44,7 +52,6 @@ describe('ReportsController', () => {
   });
 
   it('deve chamar o use case de ativação ao chamar activate', async () => {
-    const loggedUser: LoggedUserProps = { id: 'admin', role: 'ADMIN' };
     const reportId = 'report-1';
     const activatedReport = new Report(
       reportId,
@@ -68,7 +75,6 @@ describe('ReportsController', () => {
   });
 
   it('deve chamar o use case de desativação ao chamar deactivate', async () => {
-    const loggedUser: LoggedUserProps = { id: 'admin', role: 'ADMIN' };
     const reportId = 'report-2';
     const deactivatedReport = new Report(
       reportId,
@@ -93,11 +99,23 @@ describe('ReportsController', () => {
     expect(result).toEqual(deactivatedReport.toView());
   });
 
+  it('deve chamar o use case de exclusão ao chamar delete', async () => {
+    const reportId = 'report-delete';
+    deleteReportUseCase.execute.mockResolvedValue(undefined);
+
+    await controller.delete(reportId, loggedUser);
+
+    expect(deleteReportUseCase.execute).toHaveBeenCalledWith(
+      reportId,
+      loggedUser,
+    );
+  });
+
   it('deve propagar exceção se o usuário não for ADMIN', async () => {
-    const loggedUser: LoggedUserProps = { id: 'user-1', role: 'USER' };
+    const commonUser: LoggedUserProps = { id: 'user-1', role: 'USER' };
     syncReportsUseCase.execute.mockRejectedValue(new ForbiddenException());
 
-    await expect(controller.create(loggedUser)).rejects.toBeInstanceOf(
+    await expect(controller.create(commonUser)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
   });

@@ -5,18 +5,6 @@ import { User } from '../entities/user.entity';
 import type { UsersRepository } from '../repositories/users.repository';
 import { CreateUserUseCase } from './create-user.usecase';
 
-const makeUsersRepositoryMock = (): jest.Mocked<UsersRepository> => ({
-  save: jest.fn(),
-  findByEmail: jest.fn(),
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  activate: jest.fn(),
-  deactivate: jest.fn(),
-  findUsersInactiveSince: jest.fn(),
-});
-
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
 }));
@@ -26,7 +14,10 @@ describe('CreateUserUseCase', () => {
   let usersRepository: jest.Mocked<UsersRepository>;
 
   beforeEach(() => {
-    usersRepository = makeUsersRepositoryMock();
+    usersRepository = {
+      findByEmail: jest.fn(),
+      save: jest.fn(),
+    } as any;
     useCase = new CreateUserUseCase(usersRepository);
   });
 

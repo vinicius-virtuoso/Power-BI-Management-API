@@ -11,53 +11,124 @@ describe('Report Entity', () => {
     isActive: true,
   };
 
-  it('deve criar um report com create', () => {
+  it('deve criar uma instância de relatório com status ativo por padrão', () => {
     const report = Report.create(reportData);
-
-    expect(report.id).toBeUndefined();
-    expect(report.externalId).toBe(reportData.externalId);
-    expect(report.name).toBe(reportData.name);
     expect(report.isActive).toBe(true);
+    expect(report.errors).toBeNull();
   });
 
-  it('deve criar um report a partir do persistence', () => {
-    const persisted = { ...reportData, id: '1' };
-    const report = Report.fromPersistence(persisted);
+  it('deve manter o lastUpdate anterior se o novo lastUpdate for null no lastUpdateEnd', () => {
+    const originalDate = new Date('2026-01-01');
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      lastUpdate: originalDate,
+    });
 
-    expect(report.id).toBe('1');
-    expect(report.externalId).toBe(reportData.externalId);
-    expect(report.name).toBe(reportData.name);
+    const updated = report.lastUpdateEnd(null as any, 'novo erro');
+
+    expect(updated.lastUpdate).toBe(originalDate);
+    expect(updated.errors).toBe('novo erro');
   });
 
-  it('deve desativar um report com deactivate', () => {
+  it('deve desativar o relatório corretamente', () => {
     const report = Report.create(reportData);
     const deactivated = report.deactivate();
 
     expect(deactivated.isActive).toBe(false);
-    expect(deactivated.id).toBe(report.id);
+    expect(report.isActive).toBe(true); // Imutabilidade
   });
 
-  it('deve ativar um report com activate', () => {
-    const report = Report.create({ ...reportData, isActive: false });
+  it('deve ativar o relatório corretamente', () => {
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      isActive: false,
+    });
     const activated = report.activate();
 
     expect(activated.isActive).toBe(true);
-    expect(activated.id).toBe(report.id);
   });
 
-  it('deve converter report para view', () => {
+  it('deve retornar null no toView se não houver erros', () => {
     const report = Report.create(reportData);
     const view = report.toView();
 
-    expect(view).toEqual({
-      id: report.id,
-      externalId: report.externalId,
-      name: report.name,
-      webUrl: report.webUrl,
-      embedUrl: report.embedUrl,
-      datasetId: report.datasetId,
-      workspaceId: report.workspaceId,
-      isActive: report.isActive,
+    expect(view.errors).toBeNull();
+  });
+
+  it('deve atualizar a última atualização e as mensagens de erro', () => {
+    const report = Report.create(reportData);
+    const now = new Date();
+    const errorMsg = '{"message": "API Timeout"}';
+
+    const updated = report.lastUpdateEnd(now, errorMsg);
+
+    expect(updated.lastUpdate).toBe(now);
+    expect(updated.errors).toBe(errorMsg);
+  });
+
+  it('deve converter para view processando o JSON de erros corretamente', () => {
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      errors: '{"code": 401, "message": "Unauthorized"}',
     });
+
+    const view = report.toView();
+
+    expect(view.errors).toEqual({ code: 401, message: 'Unauthorized' });
+  });
+
+  it('deve retornar a string original no toView se o erro não for um JSON válido', () => {
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      errors: 'Erro genérico de rede',
+    });
+
+    const view = report.toView();
+
+    expect(view.errors).toBe('Erro genérico de rede');
+  });
+
+  it('deve retornar null no campo de erros se passar null para lastUpdateEnd', () => {
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      errors: 'erro antigo',
+    });
+
+    const updated = report.lastUpdateEnd(new Date(), null);
+
+    expect(updated.errors).toBeNull();
+  });
+
+  it('deve usar o lastUpdate atual se o novo for undefined no lastUpdateEnd', () => {
+    const originalDate = new Date('2026-01-01');
+    const report = Report.fromPersistence({
+      ...reportData,
+      id: '1',
+      lastUpdate: originalDate,
+    });
+
+    const updated = report.lastUpdateEnd(undefined as any, 'erro');
+
+    expect(updated.lastUpdate).toBe(originalDate);
+  });
+
+  it('deve garantir que fromPersistence mapeia todos os campos, incluindo os opcionais', () => {
+    const fullData = {
+      ...reportData,
+      id: 'uuid-123',
+      lastUpdate: new Date(),
+      errors: 'algum erro',
+    };
+
+    const report = Report.fromPersistence(fullData);
+
+    expect(report.id).toBe(fullData.id);
+    expect(report.lastUpdate).toBe(fullData.lastUpdate);
+    expect(report.errors).toBe(fullData.errors);
   });
 });

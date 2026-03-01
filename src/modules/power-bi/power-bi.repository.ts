@@ -1,10 +1,12 @@
 import type {
+  AzureTokenResponse,
   PowerBiEmbedTokenResponse,
+  PowerBiGetLatestRefreshStatusResponse,
   PowerBiReportResponse,
 } from './power-bi.types';
 
 export interface PowerBiRepository {
-  authenticate(): Promise<string>;
+  authenticate(): Promise<AzureTokenResponse>;
   listReports(token: string): Promise<PowerBiReportResponse[]>;
   generateEmbedToken(
     accessToken: string,
@@ -17,18 +19,5 @@ export interface PowerBiRepository {
   getLatestRefreshStatus(
     token: string,
     datasetId: string,
-  ): Promise<
-    | {
-        status: string;
-        error: any;
-        startTime?: undefined;
-        endTime?: undefined;
-      }
-    | {
-        status: any;
-        startTime: any;
-        endTime: any;
-        error: any;
-      }
-  >;
+  ): Promise<PowerBiGetLatestRefreshStatusResponse>;
 }

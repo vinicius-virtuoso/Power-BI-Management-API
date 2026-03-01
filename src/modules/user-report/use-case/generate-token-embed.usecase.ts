@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { LoggedUserProps } from '../../../shared/types/logged-user.types';
 import type { PowerBiRepository } from '../../power-bi/power-bi.repository';
 import type { PowerBiEmbedTokenResponse } from '../../power-bi/power-bi.types';
@@ -23,10 +23,16 @@ export class GenerateTokenEmbedUseCase {
       loggedUser,
     );
 
-    const accessToken = await this.powerBiRepository.authenticate();
+    const powerBiToken = await this.powerBiRepository.authenticate();
+
+    if ('statusCode' in powerBiToken) {
+      throw new UnauthorizedException(
+        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+      );
+    }
 
     return this.powerBiRepository.generateEmbedToken(
-      accessToken,
+      powerBiToken.access_token,
       report.externalId,
     );
   }

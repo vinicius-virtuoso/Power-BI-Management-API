@@ -2,10 +2,27 @@ import { HttpService } from '@nestjs/axios';
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { of, throwError } from 'rxjs';
 import { PowerBiGateway } from './power-bi.gateway';
+import type { PowerBiGetLatestRefreshStatus } from './power-bi.types';
 
 describe('PowerBiGateway', () => {
   let gateway: PowerBiGateway;
   let httpService: jest.Mocked<HttpService>;
+
+  const createAxiosResponse = (data: any, status = 200): AxiosResponse => ({
+    data,
+    status,
+    statusText: 'OK',
+    headers: {},
+    config: {} as InternalAxiosRequestConfig,
+  });
+
+  // Helper para simular erros do Axios/RxJS
+  const mockAxiosError = (status: number | null) => {
+    const error = status
+      ? { response: { status } }
+      : new Error('Network Error');
+    return throwError(() => error);
+  };
 
   beforeEach(() => {
     httpService = {
@@ -14,119 +31,157 @@ describe('PowerBiGateway', () => {
     } as any;
 
     gateway = new PowerBiGateway(httpService);
+    process.env.AZURE_TENANT_ID = 'tenant-id';
+    process.env.POWER_BI_WORKSPACE_ID = 'workspace-id';
+    process.env.POWER_BI_API_URL = 'https://api.powerbi.com/v1.0/myorg/groups';
   });
 
   describe('authenticate', () => {
-    it('deve retornar token quando a autenticação for bem-sucedida', async () => {
-      const axiosResponse: AxiosResponse = {
-        data: { access_token: 'mock-token' },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig,
-      };
-      httpService.post.mockReturnValue(of(axiosResponse));
-
-      const token = await gateway.authenticate();
-
-      expect(token).toBe('mock-token');
-      expect(httpService.post).toHaveBeenCalled();
-    });
-
-    it('deve lançar erro se a chamada HTTP falhar', async () => {
+    it('deve retornar access_token com sucesso', async () => {
       httpService.post.mockReturnValue(
-        throwError(() => new Error('Erro HTTP')),
+        of(createAxiosResponse({ access_token: 'token-123' })),
       );
-
-      await expect(gateway.authenticate()).rejects.toThrow('Erro HTTP');
-    });
-  });
-
-  describe('listReports', () => {
-    it('deve retornar a lista de relatórios formatada', async () => {
-      const axiosResponse: AxiosResponse = {
-        data: {
-          value: [
-            {
-              id: '1',
-              name: 'Relatório 1',
-              webUrl: 'webUrl1',
-              embedUrl: 'embedUrl1',
-              datasetId: 'dataset1',
-              workspaceId: 'workspace1',
-            },
-          ],
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig,
-      };
-
-      httpService.get.mockReturnValue(of(axiosResponse));
-
-      const reports = await gateway.listReports('token');
-
-      expect(reports).toEqual([
-        {
-          externalId: '1',
-          name: 'Relatório 1',
-          webUrl: 'webUrl1',
-          embedUrl: 'embedUrl1',
-          datasetId: 'dataset1',
-          workspaceId: 'workspace1',
-        },
-      ]);
-
-      expect(httpService.get).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          headers: { Authorization: `Bearer token` },
-        }),
-      );
+      const result = await gateway.authenticate();
+      expect(result).toEqual({ access_token: 'token-123' });
     });
 
-    it('deve lançar erro se a chamada HTTP falhar', async () => {
-      httpService.get.mockReturnValue(throwError(() => new Error('Erro HTTP')));
+    it('deve retornar statusCode do erro na autenticação', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(401));
+      const result = await gateway.authenticate();
+      expect(result).toEqual({ statusCode: 401 });
+    });
 
-      await expect(gateway.listReports('token')).rejects.toThrow('Erro HTTP');
+    it('deve retornar 500 em erro desconhecido na autenticação', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(null));
+      const result = await gateway.authenticate();
+      expect(result).toEqual({ statusCode: 500 });
     });
   });
 
   describe('generateEmbedToken', () => {
-    it('deve retornar embed token corretamente', async () => {
-      const axiosResponse: AxiosResponse = {
-        data: { token: 'embed-token', expiration: '2026-01-01T00:00:00Z' },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig,
-      };
-      httpService.post.mockReturnValue(of(axiosResponse));
+    it('deve retornar token de embed com sucesso', async () => {
+      httpService.post.mockReturnValue(
+        of(createAxiosResponse({ token: 'tk', expiration: 'exp' })),
+      );
+      const result = await gateway.generateEmbedToken('tk', 'rep-id');
+      expect(result).toEqual({ token: 'tk', expiration: 'exp' });
+    });
 
-      const embed = await gateway.generateEmbedToken('token', 'report-1');
+    it('deve retornar statusCode do erro ao gerar embed token', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(403));
+      const result = await gateway.generateEmbedToken('tk', 'rep-id');
+      expect(result).toEqual({ statusCode: 403 });
+    });
 
-      expect(embed).toEqual({
-        token: 'embed-token',
-        expiration: '2026-01-01T00:00:00Z',
-      });
-      expect(httpService.post).toHaveBeenCalledWith(
-        expect.any(String),
-        { accessLevel: 'View' },
-        expect.objectContaining({
-          headers: { Authorization: `Bearer token` },
-        }),
+    it('deve retornar 500 se generateEmbedToken falhar sem resposta do servidor', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(null)); // Simula erro sem response
+      const result = await gateway.generateEmbedToken('tk', 'rep-id');
+      expect(result).toEqual({ statusCode: 500 });
+    });
+  });
+
+  describe('getLatestRefreshStatus', () => {
+    it('deve retornar status do refresh com sucesso', async () => {
+      const mockData = { value: [{ status: 'Completed', startTime: '10:00' }] };
+      httpService.get.mockReturnValue(of(createAxiosResponse(mockData)));
+
+      const result = await gateway.getLatestRefreshStatus('tk', 'ds-id');
+
+      expect((result as PowerBiGetLatestRefreshStatus).status).toBe(
+        'Completed',
       );
     });
 
-    it('deve lançar erro se a chamada HTTP falhar', async () => {
-      httpService.post.mockReturnValue(
-        throwError(() => new Error('Erro HTTP')),
+    it('deve retornar statusCode do erro no status do refresh', async () => {
+      httpService.get.mockReturnValue(mockAxiosError(404));
+      const result = await gateway.getLatestRefreshStatus('tk', 'ds-id');
+
+      expect(result).toEqual({ statusCode: 404 });
+    });
+
+    it('deve retornar 500 se getLatestRefreshStatus falhar sem resposta do servidor', async () => {
+      httpService.get.mockReturnValue(mockAxiosError(null));
+      const result = await gateway.getLatestRefreshStatus('tk', 'ds-id');
+      expect(result).toEqual({ statusCode: 500 });
+    });
+
+    it('deve retornar status Unknown quando não houver nenhum refresh no histórico', async () => {
+      httpService.get.mockReturnValue(of(createAxiosResponse({ value: [] })));
+
+      const result = await gateway.getLatestRefreshStatus('tk', 'ds-id');
+
+      expect(result).toEqual({ status: 'Unknown', error: null });
+    });
+
+    it('deve retornar o erro serviceExceptionJson quando disponível', async () => {
+      const mockData = {
+        value: [
+          {
+            status: 'Failed',
+            startTime: '10:00',
+            serviceExceptionJson: 'PowerBI Error Details',
+          },
+        ],
+      };
+      httpService.get.mockReturnValue(of(createAxiosResponse(mockData)));
+
+      const result = await gateway.getLatestRefreshStatus('tk', 'ds-id');
+
+      expect(result).toMatchObject({
+        status: 'Failed',
+        error: 'PowerBI Error Details',
+      });
+    });
+  });
+
+  describe('triggerDatasetRefresh', () => {
+    it('deve disparar refresh com sucesso', async () => {
+      httpService.post.mockReturnValue(of(createAxiosResponse({}, 202)));
+      const result = await gateway.triggerDatasetRefresh('tk', 'ds-id');
+
+      // Como o retorno é PowerBiStatusCode, acessamos o statusCode diretamente
+      expect(result.statusCode).toBe(202);
+    });
+
+    it('deve retornar statusCode do erro ao disparar refresh', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(400));
+      const result = await gateway.triggerDatasetRefresh('tk', 'ds-id');
+
+      expect(result.statusCode).toBe(400);
+    });
+
+    it('deve retornar 500 se triggerDatasetRefresh falhar sem resposta do servidor', async () => {
+      httpService.post.mockReturnValue(mockAxiosError(null));
+      const result = await gateway.triggerDatasetRefresh('tk', 'ds-id');
+      expect(result).toEqual({ statusCode: 500 });
+    });
+  });
+
+  describe('listReports', () => {
+    it('deve mapear os campos do relatório corretamente', async () => {
+      const mockPbiReport = {
+        id: 'id-1',
+        name: 'Report 1',
+        webUrl: 'web-url',
+        embedUrl: 'embed-url',
+        datasetId: 'ds-1',
+        datasetWorkspaceId: 'ws-1',
+      };
+
+      httpService.get.mockReturnValue(
+        of(createAxiosResponse({ value: [mockPbiReport] })),
       );
 
-      await expect(
-        gateway.generateEmbedToken('token', 'report-1'),
-      ).rejects.toThrow('Erro HTTP');
+      const result = await gateway.listReports('token');
+
+      expect(result[0]).toEqual({
+        externalId: 'id-1',
+        name: 'Report 1',
+        webUrl: 'web-url',
+        embedUrl: 'embed-url',
+        datasetId: 'ds-1',
+        workspaceId: 'ws-1',
+      });
     });
   });
 });

@@ -40,14 +40,24 @@ export class CheckReportRefreshStatusUseCase {
 
     const powerBiToken = await this.powerBiRepository.authenticate();
 
-    if (!powerBiToken) {
-      throw new UnauthorizedException();
+    if ('statusCode' in powerBiToken) {
+      throw new UnauthorizedException(
+        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+      );
     }
 
     const remoteStatus = await this.powerBiRepository.getLatestRefreshStatus(
-      powerBiToken,
+      powerBiToken.access_token,
       reportFound.datasetId,
     );
+
+    if ('statusCode' in remoteStatus) {
+      if (remoteStatus.statusCode === 404) {
+        throw new NotFoundException('Dataset not found in Power BI workspace');
+      }
+
+      return reportFound.toView();
+    }
 
     if (
       remoteStatus.error ||
@@ -61,6 +71,8 @@ export class CheckReportRefreshStatusUseCase {
       );
       await this.reportsRepository.update(reportUpdated);
       return reportUpdated.toView();
+    } else {
+      return reportFound.toView();
     }
   }
 }

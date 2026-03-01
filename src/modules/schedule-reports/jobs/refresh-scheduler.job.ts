@@ -46,10 +46,16 @@ export class RefreshSchedulerJob {
       if (targetHours.includes(currentHour)) {
         const report = await this.reportsRepository.findById(schedule.reportId);
 
+        if (!report || !report.isActive) {
+          this.logger.warn(
+            `Schedule skipped: Report ${schedule.reportId} is inactive or not found.`,
+          );
+          continue;
+        }
+
         if (report?.lastUpdate) {
           const lastUpdate = new Date(report.lastUpdate);
 
-          // Se a última atualização foi hoje E na mesma hora atual, ignoramos o disparo
           const alreadyUpdatedThisHour =
             lastUpdate.getHours() === now.getHours() &&
             lastUpdate.getDate() === now.getDate() &&
@@ -62,7 +68,6 @@ export class RefreshSchedulerJob {
             continue;
           }
         }
-        // -----------------------------------------
 
         this.logger.log(
           `Iniciando atualização automática: Report ${schedule.reportId}`,
@@ -74,7 +79,6 @@ export class RefreshSchedulerJob {
             role: 'ADMIN',
           });
         } catch (error) {
-          // logger
           this.logger.error(
             `Erro ao atualizar report ${schedule.reportId}:`,
             error.message,

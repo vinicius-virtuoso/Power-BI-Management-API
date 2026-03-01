@@ -10,4 +10,6 @@ export interface UsersRepository {
   update(user: User): Promise<User | null>;
   delete(userId: string): Promise<boolean>;
   findUsersInactiveSince(date: Date): Promise<User[]>;
+  deleteMany(ids: string[]): Promise<void>;
+  updateMany(users: User[]): Promise<void>;
 }

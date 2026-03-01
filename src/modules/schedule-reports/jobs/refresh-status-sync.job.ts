@@ -15,15 +15,14 @@ export class RefreshStatusSyncJob {
     private readonly checkStatusUseCase: CheckReportRefreshStatusUseCase,
   ) {}
 
-  // Roda a cada 15 minutos
   @Cron('0 */15 * * * *', {
-    name: 'Status de Atualização de relatórios',
+    name: 'Report Status Sync',
     timeZone: 'America/Sao_Paulo',
   })
   async handleStatusSync() {
-    this.logger.log('Sincronizando status de relatórios ativos...');
+    this.logger.log('Syncing active report statuses...');
 
-    const reports = await this.reportsRepository.findAll();
+    const reports = await this.reportsRepository.findAllActive();
 
     for (const report of reports) {
       try {
@@ -33,7 +32,7 @@ export class RefreshStatusSyncJob {
         });
       } catch (error) {
         this.logger.error(
-          `Erro na sincronização do report ${report.id}: ${error.message}`,
+          `Error syncing report ${report.id}: ${error.message}`,
         );
       }
     }

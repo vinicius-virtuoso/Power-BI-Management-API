@@ -18,7 +18,7 @@ export type ReportView = {
   workspaceId: string;
   isActive: boolean;
   lastUpdate: Date;
-  erros: string | null;
+  errors: string | null;
 };
 
 export class Report {
@@ -132,7 +132,15 @@ export class Report {
       workspaceId: this.workspaceId,
       isActive: this.isActive,
       lastUpdate: this.lastUpdate,
-      erros: this.errors ? JSON.parse(this.errors) : null,
+      errors: this.errors ? this.safeParse(this.errors) : null,
     };
+  }
+
+  private safeParse(data: string): any {
+    try {
+      return JSON.parse(data);
+    } catch {
+      return data;
+    }
   }
 }

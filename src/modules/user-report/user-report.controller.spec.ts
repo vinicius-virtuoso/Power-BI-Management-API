@@ -74,6 +74,8 @@ describe('UserReportController', () => {
           webUrl: 'https://web1.url',
           workspaceId: 'ws-10',
           isActive: true,
+          lastUpdate: null,
+          errors: null,
         },
         {
           id: '11',
@@ -84,6 +86,8 @@ describe('UserReportController', () => {
           webUrl: 'https://web2.url',
           workspaceId: 'ws-11',
           isActive: true,
+          lastUpdate: null,
+          errors: null,
         },
       ],
     };
@@ -106,6 +110,8 @@ describe('UserReportController', () => {
       webUrl: 'https://web1.url',
       workspaceId: 'ws-10',
       isActive: true,
+      lastUpdate: null,
+      errors: null,
       token: 'embed-token',
       expiration: '2026-01-01T00:00:00Z',
     };

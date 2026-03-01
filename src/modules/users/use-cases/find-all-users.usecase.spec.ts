@@ -46,9 +46,9 @@ describe('FindAllUsersUseCase', () => {
     });
 
     expect(usersRepository.findAll).toHaveBeenCalled();
-    expect(result).toHaveLength(2);
-    expect(result[0].email).toBe('user1@email.com');
-    expect(result[1].email).toBe('user2@email.com');
+    expect(result.users).toHaveLength(2);
+    expect(result.users[0].email).toBe('user1@email.com');
+    expect(result.users[1].email).toBe('user2@email.com');
   });
 
   it('deve lançar ForbiddenException quando o usuário logado não for ADMIN', async () => {

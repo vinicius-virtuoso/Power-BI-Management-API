@@ -21,6 +21,16 @@ export class PrismaReportsRepository implements ReportsRepository {
     return reportsFound.map((report) => Report.fromPersistence(report));
   }
 
+  async findAllActive(): Promise<Report[]> {
+    const reportsFound = await this.prisma.report.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+
+    return reportsFound.map((report) => Report.fromPersistence(report));
+  }
+
   async findByIds(reportIds: string[]): Promise<Report[]> {
     if (reportIds.length === 0) return [];
     const reportsFound = await this.prisma.report.findMany({

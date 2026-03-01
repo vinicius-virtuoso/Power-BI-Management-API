@@ -33,17 +33,17 @@ export class FindAllReportsUseCase {
 
       const reportIds = userReports.map((ur) => ur.reportId);
       const reports = await this.reportsRepository.findByIds(reportIds);
+      const onlyActive = reports
+        .map((r) => r.toView())
+        .filter((report) => report.isActive === true);
 
       return {
-        total: reports.length,
-        reports: reports
-          .map((r) => r.toView())
-          .filter((report) => report.isActive === true),
+        total: onlyActive.length,
+        reports: onlyActive,
       };
     }
 
     const reportAll = await this.reportsRepository.findAll();
-    console.log(reportAll);
 
     return {
       total: reportAll.length,

@@ -7,24 +7,15 @@ import { User } from '../entities/user.entity';
 import type { UsersRepository } from '../repositories/users.repository';
 import { DeactivateUserUseCase } from './deactivate-user.usecase';
 
-const makeUsersRepositoryMock = (): jest.Mocked<UsersRepository> => ({
-  save: jest.fn(),
-  findByEmail: jest.fn(),
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  activate: jest.fn(),
-  deactivate: jest.fn(),
-  findUsersInactiveSince: jest.fn(),
-});
-
 describe('DeactivateUserUseCase', () => {
   let useCase: DeactivateUserUseCase;
   let usersRepository: jest.Mocked<UsersRepository>;
 
   beforeEach(() => {
-    usersRepository = makeUsersRepositoryMock();
+    usersRepository = {
+      findById: jest.fn(),
+      deactivate: jest.fn(),
+    } as any;
     useCase = new DeactivateUserUseCase(usersRepository);
   });
 

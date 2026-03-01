@@ -5,29 +5,28 @@ export type UserCreate = {
   name: string;
   password: string;
   role: UserRole;
-  lastAccess: Date | null;
 };
 
 export type UserView = {
-  id: string | null;
+  id: string;
   email: string;
   name: string;
   role: UserRole;
   isActive: boolean;
-  lastAccess: Date | null;
+  lastAccess?: Date;
   createdAt?: Date;
   updatedAt?: Date | null;
 };
 
 export class User {
   private constructor(
-    readonly id: string | null,
+    readonly id: string,
     readonly email: string,
     readonly name: string,
     readonly password: string,
     readonly role: UserRole,
     readonly isActive: boolean,
-    readonly lastAccess: Date | null,
+    readonly lastAccess?: Date,
     readonly createdAt?: Date,
     readonly updatedAt?: Date | null,
   ) {}
@@ -53,9 +52,9 @@ export class User {
     password: string;
     role: UserRole;
     isActive: boolean;
-    lastAccess: Date | null;
-    createdAt: Date;
-    updatedAt: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+    lastAccess?: Date;
   }): User {
     return new User(
       data.id,

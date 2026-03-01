@@ -60,6 +60,28 @@ export class PrismaUsersRepository implements UsersRepository {
     return this.update(user.deactivate());
   }
 
+  async deleteMany(ids: string[]): Promise<void> {
+    await this.prisma.user.deleteMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+  }
+
+  async updateMany(users: User[]): Promise<void> {
+    const ids = users.map((u) => u.id).filter((id): id is string => !!id);
+
+    await this.prisma.user.updateMany({
+      where: {
+        id: { in: ids },
+      },
+      data: {
+        isActive: false,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
   async delete(id: string): Promise<boolean> {
     try {
       await this.prisma.user.delete({ where: { id } });

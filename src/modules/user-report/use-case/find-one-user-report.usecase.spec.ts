@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import type { PowerBiRepository } from '../../power-bi/power-bi.repository';
 import type { ReportView } from '../../reports/entities/report.entity';
 import { ReportAccessService } from '../service/report-access/report-access.service';
@@ -34,9 +35,11 @@ describe('FindOneUserReportUseCase', () => {
       datasetId: 'datasetId-2',
       webUrl: 'webUrl-2',
       workspaceId: 'workspaceId-1',
+      lastUpdate: null,
+      errors: null,
     };
 
-    const accessToken = 'power-bi-access-token';
+    const accessToken = { access_token: 'power-bi-access-token' };
 
     const embedToken = {
       token: 'embed-token',
@@ -60,7 +63,7 @@ describe('FindOneUserReportUseCase', () => {
     expect(powerBiRepository.authenticate).toHaveBeenCalled();
 
     expect(powerBiRepository.generateEmbedToken).toHaveBeenCalledWith(
-      accessToken,
+      accessToken.access_token,
       reportView.externalId,
     );
 
@@ -68,5 +71,25 @@ describe('FindOneUserReportUseCase', () => {
       ...reportView,
       ...embedToken,
     });
+  });
+
+  it('deve lançar UnauthorizedException se a autenticação com Power BI falhar', async () => {
+    reportAccessService.validateAccess.mockResolvedValue({
+      externalId: 'ext-id',
+    } as any);
+
+    powerBiRepository.authenticate.mockResolvedValue({
+      statusCode: 401,
+    });
+
+    const promise = useCase.execute('report-id', {
+      id: 'user-id',
+      role: 'USER',
+    });
+
+    await expect(promise).rejects.toThrow(UnauthorizedException);
+    await expect(promise).rejects.toThrow(
+      'Failed to authenticate with Power BI: 401',
+    );
   });
 });

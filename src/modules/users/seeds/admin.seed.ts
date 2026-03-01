@@ -44,7 +44,6 @@ export class AdminSeed implements OnApplicationBootstrap {
       name,
       password: hashedPassword,
       role: 'ADMIN',
-      lastAccess: null,
     });
 
     await this.usersRepository.save(admin);

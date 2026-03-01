@@ -47,6 +47,12 @@ export class InMemoryReportsRepository implements ReportsRepository {
     return reports;
   }
 
+  async findAllActive(): Promise<Report[]> {
+    const reports = this.reports.filter((report) => report.isActive);
+
+    return reports;
+  }
+
   async findByExternalId(externalId: string): Promise<Report | null> {
     const reportFound = this.reports.find(
       (report) => report.externalId === externalId,

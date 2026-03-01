@@ -21,6 +21,8 @@ describe('UsersController', () => {
   const deactivateUserUseCase = { execute: jest.fn() };
   const deleteUserUseCase = { execute: jest.fn() };
 
+  const mockLoggedUser = { id: 'admin-id', role: 'ADMIN' };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -36,101 +38,103 @@ describe('UsersController', () => {
       ],
     }).compile();
 
-    controller = module.get(UsersController);
+    controller = module.get<UsersController>(UsersController);
+    jest.clearAllMocks(); // Limpa o estado dos mocks entre os testes
+  });
+
+  it('deve delegar a busca do usuário logado (me) para o use case', async () => {
+    const mockView = { id: 'user-1', name: 'John Doe', email: 'john@john.com' };
+    findUserLoggedUseCase.execute.mockResolvedValue(mockView);
+
+    const result = await controller.findUserLogged(mockLoggedUser as any);
+
+    expect(findUserLoggedUseCase.execute).toHaveBeenCalledWith(mockLoggedUser);
+    expect(result).toEqual(mockView);
   });
 
   it('deve delegar a criação de usuário para o use case', async () => {
     createUserUseCase.execute.mockResolvedValue({ id: '1' });
+    const dto = {
+      name: 'User',
+      email: 'a@a.com',
+      password: '123',
+      role: 'USER',
+    };
 
-    const result = await controller.create(
-      { name: 'User', email: 'a@a.com', password: '123', role: 'USER' } as any,
-      { id: 'admin', role: 'ADMIN' },
-    );
+    const result = await controller.create(dto as any, mockLoggedUser as any);
 
-    expect(createUserUseCase.execute).toHaveBeenCalled();
+    expect(createUserUseCase.execute).toHaveBeenCalledWith(dto, mockLoggedUser);
     expect(result.id).toBe('1');
   });
 
   it('deve delegar a listagem de usuários para o use case', async () => {
     findAllUsersUseCase.execute.mockResolvedValue([]);
 
-    const result = await controller.findAll({ id: 'admin', role: 'ADMIN' });
+    const result = await controller.findAll(mockLoggedUser as any);
 
-    expect(findAllUsersUseCase.execute).toHaveBeenCalledWith({
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    expect(findAllUsersUseCase.execute).toHaveBeenCalledWith(mockLoggedUser);
     expect(result).toEqual([]);
   });
 
-  it('deve delegar a busca de um usuário para o use case', async () => {
-    findOneUserUseCase.execute.mockResolvedValue({ id: '1' });
+  it('deve delegar a busca de um usuário específico para o use case', async () => {
+    findOneUserUseCase.execute.mockResolvedValue({ id: 'user-1' });
 
-    const result = await controller.findOne('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    const result = await controller.findOne('user-1', mockLoggedUser as any);
 
-    expect(findOneUserUseCase.execute).toHaveBeenCalledWith('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
-    expect(result.id).toBe('1');
+    expect(findOneUserUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      mockLoggedUser,
+    );
+    expect(result.id).toBe('user-1');
   });
 
   it('deve delegar a atualização de usuário para o use case', async () => {
-    updateUserUseCase.execute.mockResolvedValue({ id: '1' });
+    updateUserUseCase.execute.mockResolvedValue({ id: 'user-1' });
+    const dto = { name: 'Updated' };
 
-    const result = await controller.update({ name: 'Updated' } as any, '1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    const result = await controller.update(
+      dto as any,
+      'user-1',
+      mockLoggedUser as any,
+    );
 
-    expect(updateUserUseCase.execute).toHaveBeenCalled();
-    expect(result.id).toBe('1');
+    expect(updateUserUseCase.execute).toHaveBeenCalledWith(
+      dto,
+      'user-1',
+      mockLoggedUser,
+    );
+    expect(result.id).toBe('user-1');
   });
 
   it('deve delegar a ativação de usuário para o use case', async () => {
     activateUserUseCase.execute.mockResolvedValue({ id: '1' });
 
-    const result = await controller.activate('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    const result = await controller.activate('1', mockLoggedUser as any);
 
-    expect(activateUserUseCase.execute).toHaveBeenCalledWith('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    expect(activateUserUseCase.execute).toHaveBeenCalledWith(
+      '1',
+      mockLoggedUser,
+    );
     expect(result.id).toBe('1');
   });
 
   it('deve delegar a desativação de usuário para o use case', async () => {
     deactivateUserUseCase.execute.mockResolvedValue({ id: '1' });
 
-    const result = await controller.deactivate('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    const result = await controller.deactivate('1', mockLoggedUser as any);
 
-    expect(deactivateUserUseCase.execute).toHaveBeenCalledWith('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    expect(deactivateUserUseCase.execute).toHaveBeenCalledWith(
+      '1',
+      mockLoggedUser,
+    );
     expect(result.id).toBe('1');
   });
 
   it('deve delegar a exclusão de usuário para o use case', async () => {
     deleteUserUseCase.execute.mockResolvedValue(undefined);
 
-    await controller.delete('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    await controller.delete('1', mockLoggedUser as any);
 
-    expect(deleteUserUseCase.execute).toHaveBeenCalledWith('1', {
-      id: 'admin',
-      role: 'ADMIN',
-    });
+    expect(deleteUserUseCase.execute).toHaveBeenCalledWith('1', mockLoggedUser);
   });
 });
