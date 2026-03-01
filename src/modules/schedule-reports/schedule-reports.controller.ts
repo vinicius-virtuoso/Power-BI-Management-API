@@ -9,10 +9,23 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserRequest } from '../../decorators/user-request.decorator';
 import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateScheduleReportDto } from './dto/create-schedule-report.dto';
+
 import { UpdateScheduleReportDto } from './dto/update-schedule-report.dto';
+
+import {
+  PaginatedSchedulesDto,
+  ScheduleReportViewDto,
+} from './dto/schedule-report-view.dto';
 import { CreateScheduleUseCase } from './use-cases/create-schedule.usecase';
 import { DeleteScheduleUseCase } from './use-cases/delete-schedule.usecase';
 import { FindAllScheduleUseCase } from './use-cases/find-all-schedule.usecase';
@@ -20,29 +33,26 @@ import { FindByIdScheduleUseCase } from './use-cases/find-by-id-schedule.usecase
 import { FindByReportIdUseCase } from './use-cases/find-by-report-id.usecase';
 import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
 
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-
-@ApiTags('Agendamento de relatórios')
+@ApiTags('Agendamento de Atualizações (Admin)')
 @ApiBearerAuth()
 @Controller('schedule-reports')
 export class ScheduleReportsController {
   constructor(
     private readonly createScheduleUseCase: CreateScheduleUseCase,
     private readonly findAllScheduleUseCase: FindAllScheduleUseCase,
-    private readonly updateScheduleUseCase: UpdateScheduleUseCase,
     private readonly findByIdScheduleUseCase: FindByIdScheduleUseCase,
     private readonly findByReportIdUseCase: FindByReportIdUseCase,
+    private readonly updateScheduleUseCase: UpdateScheduleUseCase,
     private readonly deleteScheduleUseCase: DeleteScheduleUseCase,
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Cria um novo agendamento de atualização (ADMIN)' })
-  @ApiResponse({ status: 201, description: 'Agendamento criado com sucesso.' })
+  @ApiOperation({ summary: 'Criar novo agendamento' })
+  @ApiResponse({ status: 201, type: ScheduleReportViewDto })
+  @ApiResponse({
+    status: 409,
+    description: 'Relatório já possui um agendamento.',
+  })
   async create(
     @Body() dto: CreateScheduleReportDto,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -51,17 +61,17 @@ export class ScheduleReportsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lista todos os agendamentos cadastrados (ADMIN)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de agendamentos retornada com sucesso.',
-  })
+  @ApiOperation({ summary: 'Listar todos os agendamentos' })
+  @ApiResponse({ status: 200, type: PaginatedSchedulesDto })
   async findAll(@UserRequest() loggedUser: LoggedUserProps) {
     return this.findAllScheduleUseCase.execute(loggedUser);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Busca um agendamento pelo ID (ADMIN)' })
+  @ApiOperation({ summary: 'Buscar agendamento por ID' })
+  @ApiParam({ name: 'id', description: 'ID do agendamento' })
+  @ApiResponse({ status: 200, type: ScheduleReportViewDto })
+  @ApiResponse({ status: 404, description: 'Agendamento não encontrado.' })
   async findById(
     @Param('id') id: string,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -70,8 +80,12 @@ export class ScheduleReportsController {
   }
 
   @Get('report/:reportId')
-  @ApiOperation({
-    summary: 'Busca agendamento vinculado a um relatório específico (ADMIN)',
+  @ApiOperation({ summary: 'Buscar agendamento pelo ID do Relatório' })
+  @ApiParam({ name: 'reportId', description: 'ID do relatório vinculado' })
+  @ApiResponse({ status: 200, type: ScheduleReportViewDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Nenhum agendamento para este relatório.',
   })
   async findByReportId(
     @Param('reportId') reportId: string,
@@ -81,7 +95,8 @@ export class ScheduleReportsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Atualiza configurações de um agendamento (ADMIN)' })
+  @ApiOperation({ summary: 'Atualizar agendamento' })
+  @ApiResponse({ status: 200, type: ScheduleReportViewDto })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateScheduleReportDto,
@@ -92,8 +107,8 @@ export class ScheduleReportsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove um agendamento de atualização (ADMIN)' })
-  @ApiResponse({ status: 204, description: 'Agendamento removido.' })
+  @ApiOperation({ summary: 'Remover agendamento' })
+  @ApiResponse({ status: 204, description: 'Removido com sucesso.' })
   async delete(
     @Param('id') id: string,
     @UserRequest() loggedUser: LoggedUserProps,
