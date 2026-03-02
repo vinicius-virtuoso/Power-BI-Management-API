@@ -55,6 +55,21 @@ export class ReportsController {
     return this.activateReportUseCase.execute(reportId, loggedUser);
   }
 
+  @Patch('deactivate/:reportId')
+  @ApiOperation({ summary: 'Ativar um relatório' })
+  @ApiResponse({ status: 200, type: ReportViewDto })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao ativar relatório no banco.',
+  }) //
+  @ApiResponse({ status: 404, description: 'Relatório não encontrado.' })
+  deactivate(
+    @Param('reportId') reportId: string,
+    @UserRequest() loggedUser: LoggedUserProps,
+  ) {
+    return this.deactivateReportUseCase.execute(reportId, loggedUser);
+  }
+
   @Delete(':reportId')
   @HttpCode(204)
   @ApiOperation({ summary: 'Excluir um relatório permanentemente' })

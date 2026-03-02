@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { UserRequest } from '../../decorators/user-request.decorator';
 import type { LoggedUserProps } from '../../shared/types/logged-user.types';
-import { ReportViewDto } from './dto/report-view.dto';
+import { RefreshDatasetViewDto } from './dto/refresh-dataset-view.dto';
 import { CheckReportRefreshStatusUseCase } from './use-cases/check-report-refresh-status.usecase';
 import { RefreshDatasetReportUseCase } from './use-cases/refresh-dataset-report.usecase';
 
@@ -62,7 +62,7 @@ export class RefreshDatasetController {
   @ApiResponse({
     status: 200,
     description: 'Dados do relatório retornados com sucesso.',
-    type: ReportViewDto,
+    type: RefreshDatasetViewDto,
   })
   check(
     @Param('reportId') reportId: string,

@@ -16,10 +16,10 @@ describe('UserReportController', () => {
 
   beforeEach(() => {
     createUserReportUseCase = { execute: jest.fn() } as any;
-    deleteUserReportUseCase = { execute: jest.fn() } as any;
     findAllReportsUseCase = { execute: jest.fn() } as any;
     findOneUserReportUseCase = { execute: jest.fn() } as any;
     generateTokenEmbedUseCase = { execute: jest.fn() } as any;
+    deleteUserReportUseCase = { execute: jest.fn() } as any;
 
     controller = new UserReportController(
       createUserReportUseCase,
@@ -37,7 +37,7 @@ describe('UserReportController', () => {
 
     createUserReportUseCase.execute.mockResolvedValue(result);
 
-    await expect(controller.create(dto, loggedUser)).resolves.toEqual(result);
+    await expect(controller.share(dto, loggedUser)).resolves.toEqual(result);
     expect(createUserReportUseCase.execute).toHaveBeenCalledWith(
       dto,
       loggedUser,
@@ -51,9 +51,9 @@ describe('UserReportController', () => {
 
     generateTokenEmbedUseCase.execute.mockResolvedValue(result);
 
-    await expect(
-      controller.generateToken(reportId, loggedUser),
-    ).resolves.toEqual(result);
+    await expect(controller.getToken(reportId, loggedUser)).resolves.toEqual(
+      result,
+    );
     expect(generateTokenEmbedUseCase.execute).toHaveBeenCalledWith(
       reportId,
       loggedUser,
@@ -133,7 +133,7 @@ describe('UserReportController', () => {
 
     deleteUserReportUseCase.execute.mockResolvedValue(undefined);
 
-    await expect(controller.delete(dto, loggedUser)).resolves.toBeUndefined();
+    await expect(controller.revoke(dto, loggedUser)).resolves.toBeUndefined();
     expect(deleteUserReportUseCase.execute).toHaveBeenCalledWith(
       dto,
       loggedUser,

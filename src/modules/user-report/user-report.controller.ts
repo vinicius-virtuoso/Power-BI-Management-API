@@ -31,10 +31,10 @@ import { GenerateTokenEmbedUseCase } from './use-case/generate-token-embed.useca
 export class UserReportController {
   constructor(
     private readonly createUserReportUseCase: CreateUserReportUseCase,
-    private readonly deleteUserReportUseCase: DeleteUserReportUseCase,
     private readonly findAllReportsUseCase: FindAllReportsUseCase,
     private readonly findOneReportsUseCase: FindOneUserReportUseCase,
     private readonly generateTokenEmbedUseCase: GenerateTokenEmbedUseCase,
+    private readonly deleteUserReportUseCase: DeleteUserReportUseCase,
   ) {}
 
   @Post('share')

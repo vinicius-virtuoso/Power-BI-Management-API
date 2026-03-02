@@ -7,7 +7,7 @@ export class InMemoryUsersRepository implements UsersRepository {
 
   async save(user: User): Promise<User> {
     const userPersisted = User.fromPersistence({
-      id: randomUUID(),
+      id: user.id ?? randomUUID(),
       createdAt: new Date(Date.now()),
       name: user.name,
       email: user.email,
@@ -100,5 +100,20 @@ export class InMemoryUsersRepository implements UsersRepository {
       (user) =>
         user.lastAccess && user.lastAccess < date && user.role === 'USER',
     );
+  }
+
+  async deleteMany(ids: string[]): Promise<void> {
+    this.users = this.users.filter((user) => !ids.includes(user.id!));
+  }
+
+  async updateMany(users: User[]): Promise<void> {
+    const idsToUpdate = new Set(users.map((u) => u.id).filter(Boolean));
+
+    this.users = this.users.map((user) => {
+      if (idsToUpdate.has(user.id)) {
+        return user.deactivate();
+      }
+      return user;
+    });
   }
 }

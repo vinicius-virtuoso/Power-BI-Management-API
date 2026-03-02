@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ReportViewDto {
+export class RefreshDatasetViewDto {
   @ApiProperty({
     example: '7f99965d-6721-4f10-9190-363189569b9f',
     nullable: true,

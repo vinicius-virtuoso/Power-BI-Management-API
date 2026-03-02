@@ -66,18 +66,15 @@ model UserReport {
 
 model ScheduleReports {
   id       String  @id @default(uuid())
-  reportId String  @unique // Um relatório deve ter apenas uma configuração de agendamento
+  reportId String  @unique
   isActive Boolean @default(true)
 
-  // Horários comuns (Ex: ["08", "12", "18"])
   hoursCommon String[]
 
-  // Regras de fechamento
   isClosingDays    Boolean  @default(false)
-  closingDays      String[] // Dias do mês (Ex: ["01", "05", "28"])
-  hoursClosingDays String[] // Horários específicos para esses dias
+  closingDays      String[]
+  hoursClosingDays String[]
 
-  // Auditoria
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
