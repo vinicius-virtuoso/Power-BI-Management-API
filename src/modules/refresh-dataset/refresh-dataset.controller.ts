@@ -55,7 +55,7 @@ export class RefreshDatasetController {
 
   @Get(':reportId/check/refreshes')
   @ApiOperation({
-    summary: 'Sincroniza e retorna o status do relatório',
+    summary: 'Sincroniza o status da atualização do reltório',
     description:
       'Consulta o Power BI e atualiza os campos lastUpdate e errors caso o refresh tenha terminado.',
   })
