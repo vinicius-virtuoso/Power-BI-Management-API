@@ -12,7 +12,7 @@ import { RefreshDatasetViewDto } from './dto/refresh-dataset-view.dto';
 import { CheckReportRefreshStatusUseCase } from './use-cases/check-report-refresh-status.usecase';
 import { RefreshDatasetReportUseCase } from './use-cases/refresh-dataset-report.usecase';
 
-@ApiTags('Power BI - Refresh Dataset')
+@ApiTags('Atualizar conjunto de dados')
 @ApiBearerAuth() // Exige token JWT para as rotas
 @Controller('refresh-dataset')
 export class RefreshDatasetController {
