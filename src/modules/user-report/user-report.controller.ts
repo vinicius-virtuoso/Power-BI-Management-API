@@ -64,17 +64,18 @@ export class UserReportController {
     return this.deleteUserReportUseCase.execute(dto, loggedUser);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Listar relatórios disponíveis para o meu usuário' })
+  @Get('user/:userId/reports')
+  @ApiOperation({ summary: 'Listar relatórios disponíveis para o usuário' })
+  @ApiParam({ name: 'userId', description: 'ID do usuário' })
   @ApiResponse({
     status: 200,
     description: 'Retorna relatórios ativos e vinculados.',
   })
-  async findAll(@UserRequest() loggedUser: LoggedUserProps) {
-    return this.findAllReportsUseCase.execute(loggedUser);
+  async findAll(@Param('userId') userId: string) {
+    return this.findAllReportsUseCase.execute(userId);
   }
 
-  @Get(':reportId/token')
+  @Get('report/:reportId/token')
   @ApiOperation({
     summary: 'Gerar token de visualização (Embed) para um relatório',
   })
@@ -91,7 +92,7 @@ export class UserReportController {
     return this.generateTokenEmbedUseCase.execute(reportId, loggedUser);
   }
 
-  @Get(':reportId')
+  @Get('report/:reportId')
   @ApiOperation({
     summary: 'Obter detalhes do relatório + Configuração de Embed',
   })
