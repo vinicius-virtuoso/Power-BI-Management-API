@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
+import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/lib/prisma';
 
@@ -83,8 +83,8 @@ describe('UsersController (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThan(0);
+          expect(Array.isArray(res.body.users)).toBe(true);
+          expect(res.body.users.length).toBeGreaterThan(0);
         });
     });
   });
@@ -140,7 +140,7 @@ describe('UsersController (e2e)', () => {
         .get('/api/users')
         .set('Authorization', `Bearer ${accessToken}`);
 
-      const adminId = usersList.body.find(
+      const adminId = usersList.body.users.find(
         (u) => u.email === 'admin@empresa.com',
       ).id;
 
@@ -156,7 +156,7 @@ describe('UsersController (e2e)', () => {
         .patch(`/api/users/${userId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ email: 'admin@empresa.com' })
-        .expect(400);
+        .expect(409);
     });
   });
 

@@ -70,7 +70,7 @@ export class ReportsController {
     return this.deactivateReportUseCase.execute(reportId, loggedUser);
   }
 
-  @Delete(':reportId')
+  @Delete('report/:reportId')
   @HttpCode(204)
   @ApiOperation({ summary: 'Excluir um relatório permanentemente' })
   @ApiResponse({ status: 204, description: 'Relatório excluído com sucesso.' })

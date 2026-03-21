@@ -28,6 +28,7 @@ export class SyncReportsPowerBIUseCase {
     if (loggedUser.role !== 'ADMIN') throw new ForbiddenException();
 
     const authResponse = await this.powerBiRepository.authenticate();
+
     if ('statusCode' in authResponse) {
       throw new UnauthorizedException(
         `Auth Failed: ${authResponse.statusCode}`,

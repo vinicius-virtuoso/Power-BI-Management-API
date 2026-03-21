@@ -94,8 +94,8 @@ describe('UserReportController', () => {
 
     findAllReportsUseCase.execute.mockResolvedValue(result);
 
-    await expect(controller.findAll(loggedUser)).resolves.toEqual(result);
-    expect(findAllReportsUseCase.execute).toHaveBeenCalledWith(loggedUser);
+    await expect(controller.findAll(loggedUser.id)).resolves.toEqual(result);
+    expect(findAllReportsUseCase.execute).toHaveBeenCalledWith(loggedUser.id);
   });
 
   it('deve retornar um relatório específico', async () => {

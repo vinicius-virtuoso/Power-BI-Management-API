@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
+import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/lib/prisma';
 import { POWER_BI_REPOSITORY } from '../src/modules/reports/reports.providers';
@@ -11,7 +11,7 @@ describe('ReportsController (e2e)', () => {
   let prisma: PrismaService;
 
   const mockPowerBiRepository = {
-    authenticate: jest.fn().mockResolvedValue('fake-token'),
+    authenticate: jest.fn().mockResolvedValue({ access_token: 'fake-token' }),
     listReports: jest.fn().mockResolvedValue([
       {
         externalId: 'ext-pbi-123',
@@ -40,12 +40,6 @@ describe('ReportsController (e2e)', () => {
 
     await app.init();
     prisma = app.get(PrismaService);
-
-    await prisma.$executeRawUnsafe('DELETE FROM "user_reports"');
-    await prisma.$executeRawUnsafe('DELETE FROM "reports"');
-    await prisma.$executeRawUnsafe(
-      'DELETE FROM "users" WHERE "email" != \'admin@empresa.com\'',
-    );
 
     const loginResponse = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -120,6 +114,49 @@ describe('ReportsController (e2e)', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.isActive).toBe(true);
+    });
+  });
+
+  describe('Reports Deletion (DELETE)', () => {
+    let reportId: string;
+
+    beforeEach(async () => {
+      // Cria um relatório específico para ser deletado
+      const report = await prisma.report.create({
+        data: {
+          externalId: `delete-${Date.now()}`,
+          name: 'Relatório para Deletar',
+          embedUrl: 'https://app.powerbi.com/reportEmbed',
+          webUrl: 'https://app.powerbi.com/view',
+          datasetId: 'ds-del',
+          workspaceId: 'ws-del',
+          isActive: true,
+        },
+      });
+      reportId = report.id;
+    });
+
+    it('deve excluir um relatório permanentemente quando ADMIN', async () => {
+      // Realiza a exclusão
+      await request(app.getHttpServer())
+        .delete(`/api/reports/report/${reportId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(204);
+
+      // Verifica se o relatório realmente sumiu do banco
+      const exists = await prisma.report.findUnique({
+        where: { id: reportId },
+      });
+      expect(exists).toBeNull();
+    });
+
+    it('deve retornar 404 ao tentar excluir um relatório que não existe', async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+
+      await request(app.getHttpServer())
+        .delete(`/api/reports/report/${fakeId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(404);
     });
   });
 });

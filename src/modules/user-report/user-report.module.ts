@@ -27,7 +27,7 @@ import { USER_REPORT_REPOSITORY } from './user-report.provider';
     {
       provide: USER_REPORT_REPOSITORY,
       useClass:
-        process.env.NODE_ENV == 'production'
+        process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production'
           ? PrismaUserReportRepository
           : InMemoryUserReportRepository,
     },

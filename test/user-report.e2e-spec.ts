@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
+import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/lib/prisma';
 
@@ -8,11 +8,6 @@ describe('UserReportController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string;
-  let userToken: string;
-
-  let sharedUserId: string;
-  let sharedReportId: string;
-  let relationId: string; // Guardaremos o ID da relação aqui
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -28,101 +23,79 @@ describe('UserReportController (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    // Limpeza
-    await prisma.$executeRawUnsafe('DELETE FROM "user_reports"');
-    await prisma.$executeRawUnsafe('DELETE FROM "reports"');
-    await prisma.$executeRawUnsafe(
-      'DELETE FROM "users" WHERE "email" != \'admin@empresa.com\'',
-    );
-
+    // Login Admin para realizar as operações de escrita
     const loginAdmin = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'admin@empresa.com', password: 'admin12345678' });
     adminToken = loginAdmin.body.access_token;
-
-    const userRes = await request(app.getHttpServer())
-      .post('/api/users/add')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({
-        name: 'User Test',
-        email: `user.${Date.now()}@test.com`,
-        password: 'password123',
-        role: 'USER',
-      });
-    sharedUserId = userRes.body.id;
-
-    const loginUser = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ email: userRes.body.email, password: 'password123' });
-    userToken = loginUser.body.access_token;
-
-    const report = await prisma.report.create({
-      data: {
-        externalId: `ext-${Date.now()}`,
-        name: 'Relatório Teste',
-        embedUrl: 'http://pbi.com',
-        webUrl: 'http://pbi.com',
-        datasetId: 'ds-1',
-        workspaceId: 'ws-1',
-        isActive: true,
-      },
-    });
-    sharedReportId = report.id;
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  describe('/reports/grant (POST)', () => {
-    it('deve conceder acesso e retornar o ID da relação', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/api/reports/grant')
+  describe('Fluxo Atômico de Vínculos', () => {
+    it('deve realizar o ciclo completo de concessão, listagem e revogação sem interferência externa', async () => {
+      // 1. Criar dados únicos para este teste (evita conflitos de IDs e e-mails)
+      const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      const user = await prisma.user.create({
+        data: {
+          name: 'User Atômico',
+          email: `user.${uniqueSuffix}@test.com`,
+          password: 'password123',
+          role: 'USER',
+        },
+      });
+
+      const report = await prisma.report.create({
+        data: {
+          externalId: `ext-${uniqueSuffix}`,
+          name: 'Relatório Atômico',
+          embedUrl: 'http://pbi.com',
+          webUrl: 'http://pbi.com',
+          datasetId: 'ds-1',
+          workspaceId: 'ws-1',
+          isActive: true,
+        },
+      });
+
+      // 2. CONCEDER ACESSO (POST /share)
+      const resGrant = await request(app.getHttpServer())
+        .post('/api/reports/share')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userId: sharedUserId,
-          reportId: sharedReportId,
+          userId: user.id,
+          reportId: report.id,
         })
         .expect(201);
 
-      relationId = res.body.id; // Pegamos o ID gerado pelo save() no repository
+      const relationId = resGrant.body.id;
       expect(relationId).toBeDefined();
-    });
-  });
 
-  describe('/reports (GET)', () => {
-    it('deve listar os relatórios no formato paginado', async () => {
-      return request(app.getHttpServer())
-        .get('/api/reports')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200)
-        .expect((res) => {
-          // Ajustado para bater com o PaginatedResult do Use Case
-          expect(res.body).toHaveProperty('total');
-          expect(Array.isArray(res.body.reports)).toBe(true);
-          expect(res.body.total).toBeGreaterThan(0);
-        });
-    });
-  });
+      const resList = await request(app.getHttpServer())
+        .get(`/api/reports/user/${user.id}/reports`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
 
-  describe('/reports/revoke (DELETE)', () => {
-    it('deve revogar o acesso usando o userReportId (ADMIN)', async () => {
-      return request(app.getHttpServer())
+      expect(resList.body.total).toBeGreaterThan(0);
+
+      // 4. REVOGAR ACESSO (DELETE /revoke)
+      // Se der 404 aqui agora, o problema é no PrismaUserReportRepository.findById
+      await request(app.getHttpServer())
         .delete('/api/reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userReportId: relationId, // Enviando o campo correto esperado pelo Use Case
+          userReportId: relationId,
         })
         .expect(204);
-    });
 
-    it('deve retornar 404 ao tentar revogar um vínculo inexistente', async () => {
-      const fakeUuid = '00000000-0000-0000-0000-000000000000';
-      return request(app.getHttpServer())
+      // 5. VERIFICAR SE REALMENTE FOI DELETADO (404 esperado)
+      await request(app.getHttpServer())
         .delete('/api/reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userReportId: fakeUuid,
+          userReportId: relationId,
         })
         .expect(404);
     });

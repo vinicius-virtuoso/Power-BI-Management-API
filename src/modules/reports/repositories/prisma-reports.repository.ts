@@ -8,8 +8,10 @@ export class PrismaReportsRepository implements ReportsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(report: CreateReport): Promise<Report> {
-    const reportCreated = await this.prisma.report.create({
-      data: report,
+    const reportCreated = await this.prisma.report.upsert({
+      where: { externalId: report.externalId },
+      update: { ...report },
+      create: { ...report },
     });
 
     return Report.fromPersistence(reportCreated);

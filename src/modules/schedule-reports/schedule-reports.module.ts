@@ -34,7 +34,7 @@ import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
     {
       provide: SCHEDULE_REPORTS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV === 'production'
+        process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production'
           ? PrismaScheduleReportsRepository
           : InMemoryScheduleReportsRepository,
     },
