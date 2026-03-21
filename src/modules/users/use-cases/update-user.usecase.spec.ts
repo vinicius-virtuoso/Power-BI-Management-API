@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -126,7 +127,7 @@ describe('UpdateUserUseCase', () => {
         id: 'admin',
         role: 'ADMIN',
       }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('deve lançar NotFoundException quando o ator não existir', async () => {

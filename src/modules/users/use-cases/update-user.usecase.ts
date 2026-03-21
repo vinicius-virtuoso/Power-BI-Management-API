@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -34,7 +35,7 @@ export class UpdateUserUseCase {
       const emailOwner = await this.usersRepository.findByEmail(data.email);
 
       if (emailOwner && emailOwner.id !== target.id) {
-        throw new BadRequestException('Email already exists');
+        throw new ConflictException('Email already exists');
       }
     }
 
