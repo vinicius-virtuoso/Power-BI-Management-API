@@ -70,9 +70,9 @@ describe('UserReportController (e2e)', () => {
         })
         .expect(201);
 
-      const relationId = resGrant.body.id;
-      expect(relationId).toBeDefined();
+      expect(resGrant.body.id).toBeDefined();
 
+      // 3. VERIFICAR SE O RELATÓRIO APARECE NA LISTAGEM
       const resList = await request(app.getHttpServer())
         .get(`/api/reports/user/${user.id}/reports`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -81,21 +81,23 @@ describe('UserReportController (e2e)', () => {
       expect(resList.body.total).toBeGreaterThan(0);
 
       // 4. REVOGAR ACESSO (DELETE /revoke)
-      // Se der 404 aqui agora, o problema é no PrismaUserReportRepository.findById
+      // Agora envia userId + reportId — o backend localiza o vínculo internamente
       await request(app.getHttpServer())
         .delete('/api/reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userReportId: relationId,
+          userId: user.id,
+          reportId: report.id,
         })
         .expect(204);
 
-      // 5. VERIFICAR SE REALMENTE FOI DELETADO (404 esperado)
+      // 5. VERIFICAR SE REALMENTE FOI DELETADO (404 esperado na segunda revogação)
       await request(app.getHttpServer())
         .delete('/api/reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userReportId: relationId,
+          userId: user.id,
+          reportId: report.id,
         })
         .expect(404);
     });

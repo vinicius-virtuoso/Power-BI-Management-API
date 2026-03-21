@@ -14,9 +14,9 @@ describe('DeleteUserReportUseCase', () => {
   beforeEach(() => {
     userReportRepository = {
       findById: jest.fn(),
+      findByUserReport: jest.fn(),
       delete: jest.fn(),
       save: jest.fn(),
-      findByUserReport: jest.fn(),
     } as unknown as jest.Mocked<UserReportRepository>;
 
     useCase = new DeleteUserReportUseCase(userReportRepository);
@@ -25,21 +25,26 @@ describe('DeleteUserReportUseCase', () => {
   it('deve lançar ForbiddenException quando o usuário não for ADMIN', async () => {
     await expect(
       useCase.execute(
-        { userReportId: 'relation-id' },
+        { userId: 'user-id', reportId: 'report-id' },
         { id: 'user-id', role: 'USER' },
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('deve lançar NotFoundException quando a relação não existir', async () => {
-    userReportRepository.findById.mockResolvedValue(null);
+    userReportRepository.findByUserReport.mockResolvedValue(null);
 
     await expect(
       useCase.execute(
-        { userReportId: 'relation-id' },
+        { userId: 'user-id', reportId: 'report-id' },
         { id: 'admin-id', role: 'ADMIN' },
       ),
     ).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(userReportRepository.findByUserReport).toHaveBeenCalledWith(
+      'user-id',
+      'report-id',
+    );
   });
 
   it('deve lançar BadRequestException quando ocorrer erro ao deletar', async () => {
@@ -49,15 +54,17 @@ describe('DeleteUserReportUseCase', () => {
       reportId: 'report-id',
     });
 
-    userReportRepository.findById.mockResolvedValue(userReport);
+    userReportRepository.findByUserReport.mockResolvedValue(userReport);
     userReportRepository.delete.mockResolvedValue(false);
 
     await expect(
       useCase.execute(
-        { userReportId: 'relation-id' },
+        { userId: 'user-id', reportId: 'report-id' },
         { id: 'admin-id', role: 'ADMIN' },
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(userReportRepository.delete).toHaveBeenCalledWith('relation-id');
   });
 
   it('deve deletar a relação com sucesso quando ADMIN', async () => {
@@ -67,14 +74,20 @@ describe('DeleteUserReportUseCase', () => {
       reportId: 'report-id',
     });
 
-    userReportRepository.findById.mockResolvedValue(userReport);
+    userReportRepository.findByUserReport.mockResolvedValue(userReport);
     userReportRepository.delete.mockResolvedValue(true);
 
     await expect(
       useCase.execute(
-        { userReportId: 'relation-id' },
+        { userId: 'user-id', reportId: 'report-id' },
         { id: 'admin-id', role: 'ADMIN' },
       ),
     ).resolves.toBeUndefined();
+
+    expect(userReportRepository.findByUserReport).toHaveBeenCalledWith(
+      'user-id',
+      'report-id',
+    );
+    expect(userReportRepository.delete).toHaveBeenCalledWith('relation-id');
   });
 });

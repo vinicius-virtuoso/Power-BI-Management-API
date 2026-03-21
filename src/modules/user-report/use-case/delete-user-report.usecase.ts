@@ -17,24 +17,25 @@ export class DeleteUserReportUseCase {
   ) {}
 
   async execute(
-    data: {
-      userReportId: string;
-    },
+    data: { userId: string; reportId: string },
     loggedUser: LoggedUserProps,
   ): Promise<void> {
     if (loggedUser.role !== 'ADMIN') {
       throw new ForbiddenException();
     }
 
-    const userReportFound = await this.userReportRepository.findById(
-      data.userReportId,
+    const userReportFound = await this.userReportRepository.findByUserReport(
+      data.userId,
+      data.reportId,
     );
 
     if (!userReportFound) {
       throw new NotFoundException('Relation not found');
     }
 
-    const isDeleted = await this.userReportRepository.delete(data.userReportId);
+    const isDeleted = await this.userReportRepository.delete(
+      userReportFound.id,
+    );
 
     if (!isDeleted) {
       throw new BadRequestException('Error on delete');

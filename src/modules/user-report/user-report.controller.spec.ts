@@ -127,9 +127,9 @@ describe('UserReportController', () => {
     );
   });
 
-  it('deve excluir um relacionamento usuário-relatório', async () => {
+  it('deve revogar acesso de um usuário a um relatório', async () => {
     const loggedUser: LoggedUserProps = { id: '1', role: 'ADMIN' };
-    const dto = { userReportId: '100' };
+    const dto = { userId: '2', reportId: '10' };
 
     deleteUserReportUseCase.execute.mockResolvedValue(undefined);
 
