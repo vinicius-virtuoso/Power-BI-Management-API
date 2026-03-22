@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { CheckReportRefreshStatusUseCase } from '../../refresh-dataset/use-cases/check-report-refresh-status.usecase';
 import { REPORTS_REPOSITORY } from '../../reports/reports.providers';
 import { ReportsRepository } from '../../reports/repositories/reports.repository';
@@ -15,7 +15,7 @@ export class RefreshStatusSyncJob {
     private readonly checkStatusUseCase: CheckReportRefreshStatusUseCase,
   ) {}
 
-  @Cron('0 */5 * * * *', {
+  @Cron(CronExpression.EVERY_5_MINUTES, {
     name: 'Report Status Sync',
     timeZone: 'America/Sao_Paulo',
   })
