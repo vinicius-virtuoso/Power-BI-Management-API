@@ -15,7 +15,7 @@ export class RefreshStatusSyncJob {
     private readonly checkStatusUseCase: CheckReportRefreshStatusUseCase,
   ) {}
 
-  @Cron('0 */15 * * * *', {
+  @Cron('0 */5 * * * *', {
     name: 'Report Status Sync',
     timeZone: 'America/Sao_Paulo',
   })
