@@ -18,7 +18,7 @@ export class RefreshSchedulerJob {
     private readonly reportsRepository: ReportsRepository, // Injetado para checar o estado atual do report
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES, {
+  @Cron(CronExpression.EVERY_30_MINUTES, {
     name: 'Atualização de relatórios',
     timeZone: 'America/Sao_Paulo',
   })
