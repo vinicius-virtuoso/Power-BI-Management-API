@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
 import { RefreshDatasetModule } from '../refresh-dataset/refresh-dataset.module';
 import { ReportsModule } from '../reports/reports.module';
 import { RefreshSchedulerJob } from './jobs/refresh-scheduler.job';
@@ -17,7 +16,6 @@ import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
 
 @Module({
   imports: [
-    ScheduleModule,
     RefreshDatasetModule, // ADICIONE ISSO AQUI
     ReportsModule,
   ],
@@ -34,7 +32,7 @@ import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
     {
       provide: SCHEDULE_REPORTS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production'
+        process.env.NODE_ENV !== 'test'
           ? PrismaScheduleReportsRepository
           : InMemoryScheduleReportsRepository,
     },

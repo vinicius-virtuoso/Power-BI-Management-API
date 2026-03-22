@@ -30,7 +30,7 @@ import { USERS_REPOSITORY } from './users.providers';
     {
       provide: USERS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production'
+        process.env.NODE_ENV !== 'test'
           ? PrismaUsersRepository
           : InMemoryUsersRepository,
     },
