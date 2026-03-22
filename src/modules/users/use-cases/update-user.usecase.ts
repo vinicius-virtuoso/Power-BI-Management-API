@@ -26,16 +26,16 @@ export class UpdateUserUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<UserView> {
     const actor = await this.usersRepository.findById(loggedUser.id);
-    if (!actor) throw new NotFoundException('Actor not found');
+    if (!actor) throw new NotFoundException('Ator não encontrado');
 
     const target = await this.usersRepository.findById(userId);
-    if (!target) throw new NotFoundException('User not found');
+    if (!target) throw new NotFoundException('Usuário não encontrado');
 
     if (data.email && data.email !== target.email) {
       const emailOwner = await this.usersRepository.findByEmail(data.email);
 
       if (emailOwner && emailOwner.id !== target.id) {
-        throw new ConflictException('Email already exists');
+        throw new ConflictException('E-mail já cadastrado');
       }
     }
 
@@ -49,7 +49,9 @@ export class UpdateUserUseCase {
       updatedUser = target.updateByAdmin({ ...data, password: passwordHashed });
     } else {
       if (actor.id !== target.id) {
-        throw new ForbiddenException();
+        throw new ForbiddenException(
+          'Você não tem permissão para acessa este recurso',
+        );
       }
 
       updatedUser = target.updateProfile({
@@ -59,7 +61,9 @@ export class UpdateUserUseCase {
     }
 
     const persisted = await this.usersRepository.update(updatedUser);
-    if (!persisted) throw new BadRequestException('Error on update user');
+    if (!persisted) {
+      throw new BadRequestException('Erro ao atualizar o usuário');
+    }
 
     return persisted.toView();
   }

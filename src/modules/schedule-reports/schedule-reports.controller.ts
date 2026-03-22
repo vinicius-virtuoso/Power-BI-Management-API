@@ -19,13 +19,11 @@ import {
 import { UserRequest } from '../../decorators/user-request.decorator';
 import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateScheduleReportDto } from './dto/create-schedule-report.dto';
-
-import { UpdateScheduleReportDto } from './dto/update-schedule-report.dto';
-
 import {
   PaginatedSchedulesDto,
   ScheduleReportViewDto,
 } from './dto/schedule-report-view.dto';
+import { UpdateScheduleReportDto } from './dto/update-schedule-report.dto';
 import { CreateScheduleUseCase } from './use-cases/create-schedule.usecase';
 import { DeleteScheduleUseCase } from './use-cases/delete-schedule.usecase';
 import { FindAllScheduleUseCase } from './use-cases/find-all-schedule.usecase';
@@ -35,6 +33,32 @@ import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
 
 @ApiTags('Agendamento de Atualizações (Admin)')
 @ApiBearerAuth()
+@ApiResponse({
+  status: 401,
+  description: 'Falha na autenticação.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 401,
+        message: 'Token é invalido ou está ausente',
+        error: 'Unauthorized',
+      },
+    },
+  },
+})
+@ApiResponse({
+  status: 403,
+  description: 'Permissão insuficiente.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 403,
+        message: 'Você não tem permissão para acessa este recurso',
+        error: 'Forbidden',
+      },
+    },
+  },
+})
 @Controller('schedule-reports')
 export class ScheduleReportsController {
   constructor(
@@ -50,8 +74,30 @@ export class ScheduleReportsController {
   @ApiOperation({ summary: 'Criar novo agendamento' })
   @ApiResponse({ status: 201, type: ScheduleReportViewDto })
   @ApiResponse({
+    status: 404,
+    description: 'Relatório não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
+  })
+  @ApiResponse({
     status: 409,
-    description: 'Relatório já possui um agendamento.',
+    description: 'Conflito: Relatório já possui um agendamento.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 409,
+          message: 'Já existe um agendamento configurado para este relatório',
+          error: 'Conflict',
+        },
+      },
+    },
   })
   async create(
     @Body() dto: CreateScheduleReportDto,
@@ -69,9 +115,25 @@ export class ScheduleReportsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar agendamento por ID' })
-  @ApiParam({ name: 'id', description: 'ID do agendamento' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do agendamento',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ScheduleReportViewDto })
-  @ApiResponse({ status: 404, description: 'Agendamento não encontrado.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Agendamento não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Agendamento não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
+  })
   async findById(
     @Param('id') id: string,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -81,11 +143,24 @@ export class ScheduleReportsController {
 
   @Get('report/:reportId')
   @ApiOperation({ summary: 'Buscar agendamento pelo ID do Relatório' })
-  @ApiParam({ name: 'reportId', description: 'ID do relatório vinculado' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório vinculado',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ScheduleReportViewDto })
   @ApiResponse({
     status: 404,
-    description: 'Nenhum agendamento para este relatório.',
+    description: 'Nenhum agendamento encontrado para o relatório.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Não foi encontrado nenhum agendamento para este relatório',
+          error: 'Not Found',
+        },
+      },
+    },
   })
   async findByReportId(
     @Param('reportId') reportId: string,
@@ -96,7 +171,25 @@ export class ScheduleReportsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar agendamento' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do agendamento',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ScheduleReportViewDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Agendamento não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Agendamento não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateScheduleReportDto,
@@ -108,7 +201,25 @@ export class ScheduleReportsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover agendamento' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do agendamento',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 204, description: 'Removido com sucesso.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Agendamento não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Agendamento não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
+  })
   async delete(
     @Param('id') id: string,
     @UserRequest() loggedUser: LoggedUserProps,

@@ -15,7 +15,7 @@ export class FindUserLoggedUseCase {
     const userFound = await this.usersRepository.findById(loggedUserProps.id);
 
     if (!userFound) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     return userFound.toView();

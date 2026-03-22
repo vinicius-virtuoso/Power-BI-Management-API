@@ -77,7 +77,7 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'vini@example.com', password: 'senha_errada' }),
-      ).rejects.toThrow(new UnauthorizedException('Invalids credentials'));
+      ).rejects.toThrow(new UnauthorizedException('E-mail ou senha incorreto'));
     });
 
     it('deve lançar UnauthorizedException se o usuário não existir', async () => {
@@ -85,7 +85,7 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'naoexiste@example.com', password: '123' }),
-      ).rejects.toThrow(new UnauthorizedException('Invalids credentials'));
+      ).rejects.toThrow(new UnauthorizedException('E-mail ou senha incorreto'));
     });
 
     it('deve lançar UnauthorizedException se o usuário estiver inativo', async () => {
@@ -95,7 +95,11 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'vini@example.com', password: '123' }),
-      ).rejects.toThrow(new UnauthorizedException('Access denied'));
+      ).rejects.toThrow(
+        new UnauthorizedException(
+          'Ops, algo estranho nessa conta, chame o suporte',
+        ),
+      );
     });
   });
 });

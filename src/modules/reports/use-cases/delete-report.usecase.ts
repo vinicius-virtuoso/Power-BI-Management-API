@@ -18,19 +18,21 @@ export class DeleteReportUseCase {
 
   async execute(reportId: string, loggedUser: LoggedUserProps): Promise<void> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(reportId);
 
     if (!reportFound) {
-      throw new NotFoundException('Report not found');
+      throw new NotFoundException('Relatório não encontrado');
     }
 
     const isDeleted = await this.reportsRepository.delete(reportId);
 
     if (!isDeleted) {
-      throw new BadRequestException('Error on delete');
+      throw new BadRequestException('Erro ao excluir relatório');
     }
   }
 }

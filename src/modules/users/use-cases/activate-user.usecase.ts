@@ -22,18 +22,21 @@ export class ActivateUserUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<UserView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const userFound = await this.usersRepository.findById(userId);
 
-    if (!userFound) throw new NotFoundException('User not found');
+    if (!userFound) throw new NotFoundException('Usuário não encontrado');
 
     const userActivated = await this.usersRepository.activate(
       userFound.activate(),
     );
 
-    if (!userActivated) throw new BadRequestException('Error on activate user');
+    if (!userActivated)
+      throw new BadRequestException('Erro ao ativar o usuário');
 
     return userActivated.toView();
   }

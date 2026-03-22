@@ -24,12 +24,14 @@ export class FindOneUserUseCase {
     const isSelf = loggedUser.id === userId;
 
     if (!isAdmin && !isSelf) {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const userFound = await this.usersRepository.findById(userId);
 
-    if (!userFound) throw new NotFoundException('User not found');
+    if (!userFound) throw new NotFoundException('Usuário não encontrado');
 
     return userFound.toView();
   }

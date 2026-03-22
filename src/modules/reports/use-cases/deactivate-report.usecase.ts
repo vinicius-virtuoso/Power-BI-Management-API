@@ -20,13 +20,15 @@ export class DeactivateReportUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<ReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(reportId);
 
     if (!reportFound) {
-      throw new NotFoundException('Report not found');
+      throw new NotFoundException('Relatório não encontrado');
     }
 
     const reportDeactivated = await this.reportsRepository.deactivate(
@@ -34,7 +36,7 @@ export class DeactivateReportUseCase {
     );
 
     if (!reportDeactivated) {
-      throw new BadRequestException('Error deactivating report');
+      throw new BadRequestException('Erro ao desativar o relatório');
     }
 
     return reportDeactivated?.toView();

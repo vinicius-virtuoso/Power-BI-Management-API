@@ -25,13 +25,17 @@ export class SyncReportsPowerBIUseCase {
   ) {}
 
   async execute(loggedUser: LoggedUserProps): Promise<PaginatedResult> {
-    if (loggedUser.role !== 'ADMIN') throw new ForbiddenException();
+    if (loggedUser.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
+    }
 
     const authResponse = await this.powerBiRepository.authenticate();
 
     if ('statusCode' in authResponse) {
       throw new UnauthorizedException(
-        `Auth Failed: ${authResponse.statusCode}`,
+        `Falha na autenticação: ${authResponse.statusCode}`,
       );
     }
 
@@ -43,23 +47,19 @@ export class SyncReportsPowerBIUseCase {
     const dbExternalIds = new Set(dbReports.map((r) => r.externalId));
     const pbiExternalIds = new Set(powerBiReports.map((r) => r.externalId));
 
-    // 1. Identificar quem precisa ser criado (está no PBI mas não no DB)
     const reportsToCreate = powerBiReports
       .filter((pbi) => !dbExternalIds.has(pbi.externalId))
       .map((pbi) => Report.create({ ...pbi, isActive: true }));
 
-    // 2. Identificar quem precisa ser desativado (está no DB ativo mas não no PBI)
     const reportsToDeactivate = dbReports
       .filter((db) => db.isActive && !pbiExternalIds.has(db.externalId))
       .map((db) => db.deactivate());
 
-    // 3. Persistência em lote (Paralelo)
     await Promise.all([
       ...reportsToCreate.map((r) => this.reportsRepository.save(r)),
       ...reportsToDeactivate.map((r) => this.reportsRepository.deactivate(r)),
     ]);
 
-    // Busca final para garantir o estado atualizado
     const finalReports = await this.reportsRepository.findAll();
 
     return {

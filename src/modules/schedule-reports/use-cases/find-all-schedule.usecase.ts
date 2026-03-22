@@ -21,7 +21,9 @@ export class FindAllScheduleUseCase {
 
   async execute(loggedUser: LoggedUserProps): Promise<PaginatedResult> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const schedules = await this.scheduleRepository.findAll();

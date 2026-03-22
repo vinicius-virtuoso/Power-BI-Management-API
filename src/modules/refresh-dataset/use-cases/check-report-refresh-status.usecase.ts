@@ -29,20 +29,22 @@ export class CheckReportRefreshStatusUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<ReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(reportId);
 
     if (!reportFound || !reportFound.activate) {
-      throw new NotFoundException('Report not found or inactive');
+      throw new NotFoundException('Relatório não encontrado ou inativo');
     }
 
     const powerBiToken = await this.powerBiRepository.authenticate();
 
     if ('statusCode' in powerBiToken) {
       throw new UnauthorizedException(
-        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+        `Falha na autenticação com o Power BI: ${powerBiToken.statusCode}`,
       );
     }
 
@@ -53,7 +55,9 @@ export class CheckReportRefreshStatusUseCase {
 
     if ('statusCode' in remoteStatus) {
       if (remoteStatus.statusCode === 404) {
-        throw new NotFoundException('Dataset not found in Power BI workspace');
+        throw new NotFoundException(
+          'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+        );
       }
 
       return reportFound.toView();

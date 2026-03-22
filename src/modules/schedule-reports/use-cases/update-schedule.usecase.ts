@@ -23,13 +23,15 @@ export class UpdateScheduleUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<ScheduleReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const scheduleFound = await this.scheduleReportsRepository.findById(id);
 
     if (!scheduleFound) {
-      throw new NotFoundException('Schedule not found');
+      throw new NotFoundException('Agendamento não encontrado');
     }
 
     let updatedSchedule = scheduleFound.update({

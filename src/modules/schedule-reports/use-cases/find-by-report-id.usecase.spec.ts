@@ -55,7 +55,9 @@ describe('FindByReportIdUseCase', () => {
     scheduleRepo.findByReportId.mockResolvedValue(null);
 
     await expect(useCase.execute(reportId, adminUser as any)).rejects.toThrow(
-      new NotFoundException('No schedule found for this report'),
+      new NotFoundException(
+        'Não foi encontrado nenhum agendamento para este relatório',
+      ),
     );
 
     expect(scheduleRepo.findByReportId).toHaveBeenCalledWith(reportId);

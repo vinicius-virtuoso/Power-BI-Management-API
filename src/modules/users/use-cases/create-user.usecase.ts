@@ -23,12 +23,14 @@ export class CreateUserUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<UserView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const userExisting = await this.usersRepository.findByEmail(data.email);
 
-    if (userExisting) throw new ConflictException('Email already exists');
+    if (userExisting) throw new ConflictException('E-mail já cadastrado');
 
     const passwordHashed = await hash(data.password, 11);
 

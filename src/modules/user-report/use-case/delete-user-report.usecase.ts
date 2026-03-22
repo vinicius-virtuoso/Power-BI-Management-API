@@ -21,7 +21,9 @@ export class DeleteUserReportUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<void> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const userReportFound = await this.userReportRepository.findByUserReport(
@@ -30,7 +32,7 @@ export class DeleteUserReportUseCase {
     );
 
     if (!userReportFound) {
-      throw new NotFoundException('Relation not found');
+      throw new NotFoundException('Relatório não encontrado');
     }
 
     const isDeleted = await this.userReportRepository.delete(
@@ -38,7 +40,7 @@ export class DeleteUserReportUseCase {
     );
 
     if (!isDeleted) {
-      throw new BadRequestException('Error on delete');
+      throw new BadRequestException('Erro ao revogar permissão');
     }
   }
 }

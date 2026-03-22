@@ -61,7 +61,9 @@ describe('RefreshDatasetReportUseCase', () => {
       await expect(
         useCase.execute('report-id', mockAdminUser as any),
       ).rejects.toThrow(
-        new BadRequestException('Another refresh request is already executing'),
+        new BadRequestException(
+          'Outra solicitação de atualização já está em execução',
+        ),
       );
     });
 
@@ -74,7 +76,9 @@ describe('RefreshDatasetReportUseCase', () => {
       await expect(
         useCase.execute('report-id', mockAdminUser as any),
       ).rejects.toThrow(
-        new NotFoundException('Dataset not found in Power BI workspace'),
+        new NotFoundException(
+          'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+        ),
       );
     });
 
@@ -87,7 +91,9 @@ describe('RefreshDatasetReportUseCase', () => {
       await expect(
         useCase.execute('report-id', mockAdminUser as any),
       ).rejects.toThrow(
-        new BadRequestException('Power BI service is currently unavailable'),
+        new BadRequestException(
+          'O serviço Power BI está atualmente indisponível',
+        ),
       );
     });
 
@@ -109,17 +115,17 @@ describe('RefreshDatasetReportUseCase', () => {
       {
         code: 400,
         error: BadRequestException,
-        msg: 'Another refresh request is already executing',
+        msg: 'Outra solicitação de atualização já está em execução',
       },
       {
         code: 404,
         error: NotFoundException,
-        msg: 'Dataset not found in Power BI workspace',
+        msg: 'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
       },
       {
         code: 500,
         error: BadRequestException,
-        msg: 'Power BI service is currently unavailable',
+        msg: 'O serviço Power BI está atualmente indisponível',
       },
     ];
 
@@ -152,7 +158,9 @@ describe('RefreshDatasetReportUseCase', () => {
 
       await expect(
         useCase.execute('report-id', mockAdminUser as any),
-      ).rejects.toThrow(new NotFoundException('Report not found or inactive'));
+      ).rejects.toThrow(
+        new NotFoundException('Relatório não encontrado ou inativo'),
+      );
     });
 
     it('deve lançar NotFoundException se o relatório estiver inativo', async () => {
@@ -163,7 +171,9 @@ describe('RefreshDatasetReportUseCase', () => {
 
       await expect(
         useCase.execute('report-id', mockAdminUser as any),
-      ).rejects.toThrow(new NotFoundException('Report not found or inactive'));
+      ).rejects.toThrow(
+        new NotFoundException('Relatório não encontrado ou inativo'),
+      );
     });
   });
 });

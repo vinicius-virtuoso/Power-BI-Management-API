@@ -58,7 +58,7 @@ describe('FindUserLoggedUseCase', () => {
     usersRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(mockLoggedUser as any)).rejects.toThrow(
-      new NotFoundException('User not found'),
+      new NotFoundException('Usuário não encontrado'),
     );
 
     expect(usersRepository.findById).toHaveBeenCalledWith(mockLoggedUser.id);

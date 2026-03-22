@@ -45,7 +45,7 @@ describe('ReportsController', () => {
     const mockResult = { total: 2, reports: [] };
     syncReportsUseCase.execute.mockResolvedValue(mockResult);
 
-    const result = await controller.create(loggedUser);
+    const result = await controller.sync(loggedUser);
 
     expect(syncReportsUseCase.execute).toHaveBeenCalledWith(loggedUser);
     expect(result).toBe(mockResult);
@@ -115,7 +115,7 @@ describe('ReportsController', () => {
     const commonUser: LoggedUserProps = { id: 'user-1', role: 'USER' };
     syncReportsUseCase.execute.mockRejectedValue(new ForbiddenException());
 
-    await expect(controller.create(commonUser)).rejects.toBeInstanceOf(
+    await expect(controller.sync(commonUser)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
   });

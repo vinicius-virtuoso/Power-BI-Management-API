@@ -27,7 +27,7 @@ export class GenerateTokenEmbedUseCase {
 
     if ('statusCode' in powerBiToken) {
       throw new UnauthorizedException(
-        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+        `Falha na autenticação com o Power BI: ${powerBiToken.statusCode}`,
       );
     }
 

@@ -74,7 +74,7 @@ describe('CreateScheduleUseCase', () => {
 
     await expect(
       useCase.execute(mockDto as any, adminUser as any),
-    ).rejects.toThrow(new NotFoundException('Report not found'));
+    ).rejects.toThrow(new NotFoundException('Relatório não encontrado'));
   });
 
   it('deve lançar ConflictException se o relatório já possuir um agendamento', async () => {
@@ -85,7 +85,7 @@ describe('CreateScheduleUseCase', () => {
       useCase.execute(mockDto as any, adminUser as any),
     ).rejects.toThrow(
       new ConflictException(
-        'A schedule has already been configured for this report',
+        'Já existe um agendamento configurado para este relatório',
       ),
     );
   });

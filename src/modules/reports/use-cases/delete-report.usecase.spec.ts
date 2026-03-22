@@ -57,7 +57,7 @@ describe('DeleteReportUseCase', () => {
 
     await expect(
       useCase.execute(reportId, mockAdminUser as any),
-    ).rejects.toThrow(new NotFoundException('Report not found'));
+    ).rejects.toThrow(new NotFoundException('Relatório não encontrado'));
 
     expect(reportsRepository.delete).not.toHaveBeenCalled();
   });
@@ -68,6 +68,6 @@ describe('DeleteReportUseCase', () => {
 
     await expect(
       useCase.execute(reportId, mockAdminUser as any),
-    ).rejects.toThrow(new BadRequestException('Error on delete'));
+    ).rejects.toThrow(new BadRequestException('Erro ao excluir relatório'));
   });
 });

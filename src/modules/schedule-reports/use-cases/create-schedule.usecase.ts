@@ -31,13 +31,15 @@ export class CreateScheduleUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<ScheduleReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(data.reportId);
 
     if (!reportFound) {
-      throw new NotFoundException('Report not found');
+      throw new NotFoundException('Relatório não encontrado');
     }
 
     const existingSchedule =
@@ -45,7 +47,7 @@ export class CreateScheduleUseCase {
 
     if (existingSchedule) {
       throw new ConflictException(
-        'A schedule has already been configured for this report',
+        'Já existe um agendamento configurado para este relatório',
       );
     }
 

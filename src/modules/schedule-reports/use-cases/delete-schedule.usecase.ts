@@ -17,13 +17,15 @@ export class DeleteScheduleUseCase {
 
   async execute(id: string, loggedUser: LoggedUserProps): Promise<void> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const scheduleExists = await this.scheduleRepository.findById(id);
 
     if (!scheduleExists) {
-      throw new NotFoundException('Schedule not found');
+      throw new NotFoundException('Agendamento não encontrado');
     }
 
     await this.scheduleRepository.delete(id);

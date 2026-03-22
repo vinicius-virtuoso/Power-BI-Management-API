@@ -21,13 +21,17 @@ export class FindByReportIdUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<ScheduleReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const schedule = await this.scheduleRepository.findByReportId(reportId);
 
     if (!schedule) {
-      throw new NotFoundException('No schedule found for this report');
+      throw new NotFoundException(
+        'Não foi encontrado nenhum agendamento para este relatório',
+      );
     }
 
     return schedule.toView();

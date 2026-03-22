@@ -7,9 +7,9 @@ export class ReportEmbedViewDto {
   @ApiProperty({ example: 'https://app.powerbi.com/reportEmbed...' })
   embedUrl: string;
 
-  @ApiProperty({ example: 'uuid-do-relatorio' })
+  @ApiProperty({ example: 'uuid-do-relatório' })
   reportId: string;
 
   @ApiProperty({ example: 3600, description: 'Tempo de expiração em segundos' })
-  expiry: number;
+  expiration: number;
 }

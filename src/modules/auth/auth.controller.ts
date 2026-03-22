@@ -24,6 +24,24 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({
+    status: 400,
+    description: 'Dados de entrada mal formatados.',
+    content: {
+      'application/json': {
+        examples: {
+          syntaxError: {
+            value: {
+              statusCode: 400,
+              message: 'JSON inválido',
+              error: 'Bad Request',
+            },
+            summary: 'JSON inválido enviado na requisição',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
     status: 401,
     description: 'Falha na autenticação.',
     content: {
@@ -32,24 +50,23 @@ export class AuthController {
           invalidsCredentials: {
             value: {
               statusCode: 401,
-              message: 'Invalids credentials',
+              message: 'E-mail ou senha incorreto',
               error: 'Unauthorized',
             },
-            summary: 'E-mail ou senha incorretos',
+            summary: 'E-mail ou senha incorreto',
           },
           inactiveUser: {
             value: {
               statusCode: 401,
-              message: 'Access denied',
+              message: 'Ops, algo estranho nessa conta, chame o suporte',
               error: 'Unauthorized',
             },
-            summary: 'Usuário desativado pelo administrador',
+            summary: 'Usuário desativado',
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Dados de entrada mal formatados.' })
   signIn(@Body() loginDto: AuthLoginDto) {
     return this.authService.login(loginDto);
   }

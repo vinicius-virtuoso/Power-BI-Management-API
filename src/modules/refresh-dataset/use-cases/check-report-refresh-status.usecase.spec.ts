@@ -94,7 +94,9 @@ describe('CheckReportRefreshStatusUseCase', () => {
       pbiRepo.getLatestRefreshStatus.mockResolvedValue({ statusCode: 404 });
 
       await expect(useCase.execute('id', ADMIN as any)).rejects.toThrow(
-        new NotFoundException('Dataset not found in Power BI workspace'),
+        new NotFoundException(
+          'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+        ),
       );
     });
 

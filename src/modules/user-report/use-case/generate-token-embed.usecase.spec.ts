@@ -84,7 +84,7 @@ describe('GenerateTokenEmbedUseCase', () => {
 
     await expect(promise).rejects.toThrow(UnauthorizedException);
     await expect(promise).rejects.toThrow(
-      'Failed to authenticate with Power BI: 401',
+      'Falha na autenticação com o Power BI: 401',
     );
   });
 });

@@ -36,19 +36,21 @@ export class CreateUserReportUseCase {
     loggedUser: LoggedUserProps,
   ): Promise<UserReportView> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(data.reportId);
 
     if (!reportFound) {
-      throw new NotFoundException('Report not found');
+      throw new NotFoundException('Relatório não encontrado');
     }
 
     const userFound = await this.usersRepository.findById(data.userId);
 
     if (!userFound) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     const userReportFound = await this.userReportRepository.findByUserReport(

@@ -29,11 +29,13 @@ export class AuthService {
       : false;
 
     if (!userFound || !passwordCompare) {
-      throw new UnauthorizedException('Invalids credentials');
+      throw new UnauthorizedException('E-mail ou senha incorreto');
     }
 
     if (!userFound.isActive) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException(
+        'Ops, algo estranho nessa conta, chame o suporte',
+      );
     }
 
     const payload = {
@@ -43,8 +45,9 @@ export class AuthService {
 
     await this.usersRepository.update(userFound.updateLastAccess());
 
+    const access_token = await this.jwtService.signAsync(payload);
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token,
     };
   }
 }

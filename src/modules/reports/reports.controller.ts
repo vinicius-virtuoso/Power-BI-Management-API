@@ -2,6 +2,7 @@ import { Controller, Delete, HttpCode, Param, Patch } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -15,6 +16,32 @@ import { SyncReportsPowerBIUseCase } from './use-cases/sync-reports-for-power-bi
 
 @ApiTags('Gerenciamento de Relatórios (Admin)')
 @ApiBearerAuth()
+@ApiResponse({
+  status: 401,
+  description: 'Falha na autenticação.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 401,
+        message: 'Token é invalido ou está ausente',
+        error: 'Unauthorized',
+      },
+    },
+  },
+})
+@ApiResponse({
+  status: 403,
+  description: 'Permissão insuficiente.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 403,
+        message: 'Você não tem permissão para acessa este recurso', // Mensagem atualizada!
+        error: 'Forbidden',
+      },
+    },
+  },
+})
 @Controller('reports')
 export class ReportsController {
   constructor(
@@ -35,19 +62,54 @@ export class ReportsController {
   @ApiResponse({
     status: 401,
     description: 'Falha na autenticação com Power BI.',
-  }) //
-  create(@UserRequest() loggedUser: LoggedUserProps) {
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 401,
+          message: 'Falha na autenticação: 401',
+          error: 'Unauthorized',
+        },
+      },
+    },
+  })
+  sync(@UserRequest() loggedUser: LoggedUserProps) {
     return this.syncReportsPowerBIUseCase.execute(loggedUser);
   }
 
   @Patch('activate/:reportId')
   @ApiOperation({ summary: 'Ativar um relatório' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ReportViewDto })
   @ApiResponse({
     status: 400,
-    description: 'Erro ao ativar relatório no banco.',
-  }) //
-  @ApiResponse({ status: 404, description: 'Relatório não encontrado.' })
+    description: 'Erro na operação.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'Erro ao ativar o relatório',
+          error: 'Bad Request',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Relatório não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'NotFound',
+        },
+      },
+    },
+  })
   activate(
     @Param('reportId') reportId: string,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -56,13 +118,39 @@ export class ReportsController {
   }
 
   @Patch('deactivate/:reportId')
-  @ApiOperation({ summary: 'Ativar um relatório' })
+  @ApiOperation({ summary: 'Desativar um relatório' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ReportViewDto })
   @ApiResponse({
     status: 400,
-    description: 'Erro ao ativar relatório no banco.',
-  }) //
-  @ApiResponse({ status: 404, description: 'Relatório não encontrado.' })
+    description: 'Erro na operação.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'Erro ao desativar o relatório',
+          error: 'Bad Request',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Relatório não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'NotFound',
+        },
+      },
+    },
+  })
   deactivate(
     @Param('reportId') reportId: string,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -73,8 +161,38 @@ export class ReportsController {
   @Delete('report/:reportId')
   @HttpCode(204)
   @ApiOperation({ summary: 'Excluir um relatório permanentemente' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 204, description: 'Relatório excluído com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Erro ao processar exclusão.' }) //
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao excluir relatório',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'Erro ao excluir relatório',
+          error: 'Bad Request',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Relatório não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'NotFound',
+        },
+      },
+    },
+  })
   delete(
     @Param('reportId') reportId: string,
     @UserRequest() loggedUser: LoggedUserProps,

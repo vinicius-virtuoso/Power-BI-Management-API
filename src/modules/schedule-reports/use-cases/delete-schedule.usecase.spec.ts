@@ -51,7 +51,7 @@ describe('DeleteScheduleUseCase', () => {
     scheduleRepo.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(scheduleId, adminUser as any)).rejects.toThrow(
-      new NotFoundException('Schedule not found'),
+      new NotFoundException('Agendamento não encontrado'),
     );
 
     expect(scheduleRepo.delete).not.toHaveBeenCalled();

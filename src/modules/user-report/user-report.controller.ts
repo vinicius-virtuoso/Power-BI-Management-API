@@ -18,6 +18,8 @@ import { UserRequest } from '../../decorators/user-request.decorator';
 import type { LoggedUserProps } from '../../shared/types/logged-user.types';
 import { CreateUserReportDto } from './dto/create-user-report.dto';
 import { DeleteUserReportDto } from './dto/delete-user-report.dto';
+import { FindAllReportsViewDto } from './dto/find-all-reports-view.dto'; // DTO de lista
+import { ReportDetailsViewDto } from './dto/report-details-view.dto';
 import { ReportEmbedViewDto } from './dto/report-embed-view.dto';
 import { CreateUserReportUseCase } from './use-case/create-user-report.usecase';
 import { DeleteUserReportUseCase } from './use-case/delete-user-report.usecase';
@@ -27,6 +29,32 @@ import { GenerateTokenEmbedUseCase } from './use-case/generate-token-embed.useca
 
 @ApiTags('Permissões e Visualização')
 @ApiBearerAuth()
+@ApiResponse({
+  status: 401,
+  description: 'Falha na autenticação.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 401,
+        message: 'Token é invalido ou está ausente',
+        error: 'Unauthorized',
+      },
+    },
+  },
+})
+@ApiResponse({
+  status: 404,
+  description: 'Relatório não encontrado',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 404,
+        message: 'Relatório não encontrado',
+        error: 'NotFound',
+      },
+    },
+  },
+})
 @Controller('reports')
 export class UserReportController {
   constructor(
@@ -38,11 +66,33 @@ export class UserReportController {
   ) {}
 
   @Post('share')
-  @ApiOperation({ summary: 'Vincular um relatório a um usuário (ADMIN)' })
+  @ApiOperation({ summary: 'Relatório compartilhado com sucesso (ADMIN)' })
   @ApiResponse({ status: 201, description: 'Vínculo criado com sucesso.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Permissão insuficiente.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 403,
+          message: 'Você não tem permissão para acessa este recurso',
+          error: 'Forbidden',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 404,
     description: 'Usuário ou Relatório não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
   })
   async share(
     @Body() dto: CreateUserReportDto,
@@ -57,6 +107,45 @@ export class UserReportController {
     summary: 'Revogar acesso de um usuário a um relatório (ADMIN)',
   })
   @ApiResponse({ status: 204, description: 'Acesso revogado.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao processar revogação.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'Erro ao revogar permissão',
+          error: 'Bad Request',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Permissão insuficiente.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 403,
+          message: 'Você não tem permissão para acessa este recurso',
+          error: 'Forbidden',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vínculo não encontrado.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Relatório não encontrado',
+          error: 'Not Found',
+        },
+      },
+    },
+  })
   async revoke(
     @Body() dto: DeleteUserReportDto,
     @UserRequest() loggedUser: LoggedUserProps,
@@ -66,10 +155,28 @@ export class UserReportController {
 
   @Get('user/:userId/reports')
   @ApiOperation({ summary: 'Listar relatórios disponíveis para o usuário' })
-  @ApiParam({ name: 'userId', description: 'ID do usuário' })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID do usuário',
+    example: 'uuid-v4',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna relatórios ativos e vinculados.',
+    type: FindAllReportsViewDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message: 'Usuário não encontrado',
+          error: 'NotFound',
+        },
+      },
+    },
   })
   async findAll(@Param('userId') userId: string) {
     return this.findAllReportsUseCase.execute(userId);
@@ -79,11 +186,24 @@ export class UserReportController {
   @ApiOperation({
     summary: 'Gerar token de visualização (Embed) para um relatório',
   })
-  @ApiParam({ name: 'reportId', description: 'ID interno do relatório' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID interno do relatório',
+    example: 'uuid-v4',
+  })
   @ApiResponse({ status: 200, type: ReportEmbedViewDto })
   @ApiResponse({
     status: 403,
     description: 'Usuário não tem permissão para este relatório.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 403,
+          message: 'Você não tem permissão para acessa este recurso',
+          error: 'Forbidden',
+        },
+      },
+    },
   })
   async getToken(
     @Param('reportId') reportId: string,
@@ -96,9 +216,28 @@ export class UserReportController {
   @ApiOperation({
     summary: 'Obter detalhes do relatório + Configuração de Embed',
   })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID interno do relatório',
+    example: 'uuid-v4',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna detalhes e token de uma vez.',
+    type: ReportDetailsViewDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Usuário não tem permissão para este relatório.',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 403,
+          message: 'Você não tem permissão para acessa este recurso',
+          error: 'Forbidden',
+        },
+      },
+    },
   })
   async findOne(
     @Param('reportId') reportId: string,

@@ -26,20 +26,22 @@ export class RefreshDatasetReportUseCase {
 
   async execute(reportId: string, loggedUser: LoggedUserProps): Promise<void> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const reportFound = await this.reportsRepository.findById(reportId);
 
     if (!reportFound || !reportFound.isActive) {
-      throw new NotFoundException('Report not found or inactive');
+      throw new NotFoundException('Relatório não encontrado ou inativo');
     }
 
     const powerBiToken = await this.powerBiRepository.authenticate();
 
     if ('statusCode' in powerBiToken) {
       throw new UnauthorizedException(
-        `Failed to authenticate with Power BI: ${powerBiToken.statusCode}`,
+        `Falha na autenticação com o Power BI: ${powerBiToken.statusCode}`,
       );
     }
 
@@ -50,17 +52,19 @@ export class RefreshDatasetReportUseCase {
 
     if (refreshReport.statusCode === 400) {
       throw new BadRequestException(
-        'Another refresh request is already executing',
+        'Outra solicitação de atualização já está em execução',
       );
     }
 
     if (refreshReport.statusCode === 404) {
-      throw new NotFoundException('Dataset not found in Power BI workspace');
+      throw new NotFoundException(
+        'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+      );
     }
 
     if (refreshReport.statusCode >= 500) {
       throw new BadRequestException(
-        'Power BI service is currently unavailable',
+        'O serviço Power BI está atualmente indisponível',
       );
     }
   }

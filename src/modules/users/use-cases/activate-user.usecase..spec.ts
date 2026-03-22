@@ -74,7 +74,7 @@ describe('ActivateUserUseCase', () => {
     usersRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute('user-id', loggedUser)).rejects.toThrow(
-      new NotFoundException('User not found'),
+      new NotFoundException('Usuário não encontrado'),
     );
 
     expect(usersRepository.activate).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('ActivateUserUseCase', () => {
     usersRepository.activate.mockResolvedValue(null as any);
 
     await expect(useCase.execute('user-id', loggedUser)).rejects.toThrow(
-      new BadRequestException('Error on activate user'),
+      new BadRequestException('Erro ao ativar o usuário'),
     );
   });
 });

@@ -18,7 +18,9 @@ export class FindAllUsersUseCase {
 
   async execute(loggedUser: LoggedUserProps): Promise<PaginatedResult> {
     if (loggedUser.role !== 'ADMIN') {
-      throw new ForbiddenException();
+      throw new ForbiddenException(
+        'Você não tem permissão para acessa este recurso',
+      );
     }
 
     const users = await this.usersRepository.findAll();

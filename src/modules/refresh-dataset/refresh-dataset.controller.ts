@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -13,7 +13,33 @@ import { CheckReportRefreshStatusUseCase } from './use-cases/check-report-refres
 import { RefreshDatasetReportUseCase } from './use-cases/refresh-dataset-report.usecase';
 
 @ApiTags('Atualizar conjunto de dados')
-@ApiBearerAuth() // Exige token JWT para as rotas
+@ApiBearerAuth()
+@ApiResponse({
+  status: 401,
+  description: 'Falha na autenticação.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 401,
+        message: 'Token é invalido ou está ausente',
+        error: 'Unauthorized',
+      },
+    },
+  },
+})
+@ApiResponse({
+  status: 403,
+  description: 'Permissão insuficiente.',
+  content: {
+    'application/json': {
+      example: {
+        statusCode: 403,
+        message: 'Você não tem permissão para acessa este recurso',
+        error: 'Forbidden',
+      },
+    },
+  },
+})
 @Controller('refresh-dataset')
 export class RefreshDatasetController {
   constructor(
@@ -22,29 +48,73 @@ export class RefreshDatasetController {
   ) {}
 
   @Post(':reportId/refreshes')
+  @HttpCode(201)
   @ApiOperation({
     summary: 'Dispara uma nova atualização de dataset no Power BI',
     description:
-      'Apenas administradores podem solicitar. A rota não retorna dados, apenas confirma o recebimento da solicitação pelo Power BI.',
+      'Solicita ao Power BI que inicie o processamento dos dados. Requer perfil ADMIN.',
   })
-  @ApiParam({ name: 'reportId', description: 'ID do relatório no sistema' })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório no sistema',
+    example: 'uuid-v4',
+  })
   @ApiResponse({
     status: 201,
-    description: 'Refresh solicitado com sucesso (No Content).',
+    description: 'Refresh solicitado com sucesso.',
   })
   @ApiResponse({
     status: 400,
-    description:
-      'Falha na solicitação: Outro refresh em execução ou serviço Power BI indisponível.',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Acesso negado: Perfil ADMIN necessário.',
+    description: 'Erro na solicitação ou serviço indisponível.',
+    content: {
+      'application/json': {
+        examples: {
+          alreadyRunning: {
+            summary: 'Atualização em execução',
+            value: {
+              statusCode: 400,
+              message: 'Outra solicitação de atualização já está em execução',
+              error: 'Bad Request',
+            },
+          },
+          serviceUnavailable: {
+            summary: 'Serviço PBI Indisponível',
+            value: {
+              statusCode: 400,
+              message: 'O serviço Power BI está atualmente indisponível',
+              error: 'Bad Request',
+            },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
-    description:
-      'Relatório não encontrado ou Dataset inexistente no workspace.',
+    description: 'Relatório ou Dataset não encontrado.',
+    content: {
+      'application/json': {
+        examples: {
+          notFoundDb: {
+            summary: 'Banco local',
+            value: {
+              statusCode: 404,
+              message: 'Relatório não encontrado ou inativo',
+              error: 'Not Found',
+            },
+          },
+          notFoundPbi: {
+            summary: 'Workspace PBI',
+            value: {
+              statusCode: 404,
+              message:
+                'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+              error: 'Not Found',
+            },
+          },
+        },
+      },
+    },
   })
   create(
     @Param('reportId') reportId: string,
@@ -55,14 +125,46 @@ export class RefreshDatasetController {
 
   @Get(':reportId/check/refreshes')
   @ApiOperation({
-    summary: 'Sincroniza o status da atualização do reltório',
+    summary: 'Sincroniza o status da atualização do relatório',
     description:
-      'Consulta o Power BI e atualiza os campos lastUpdate e errors caso o refresh tenha terminado.',
+      'Consulta o Power BI para verificar se a atualização disparada foi concluída.',
+  })
+  @ApiParam({
+    name: 'reportId',
+    description: 'ID do relatório no sistema',
+    example: 'uuid-v4',
   })
   @ApiResponse({
     status: 200,
-    description: 'Dados do relatório retornados com sucesso.',
+    description: 'Status sincronizado com sucesso.',
     type: RefreshDatasetViewDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Relatório ou Dataset não encontrado.',
+    content: {
+      'application/json': {
+        examples: {
+          notFoundDb: {
+            summary: 'Banco local',
+            value: {
+              statusCode: 404,
+              message: 'Relatório não encontrado ou inativo',
+              error: 'Not Found',
+            },
+          },
+          notFoundPbi: {
+            summary: 'Workspace PBI',
+            value: {
+              statusCode: 404,
+              message:
+                'Conjunto de dados não encontrado no espaço de trabalho do Power BI',
+              error: 'Not Found',
+            },
+          },
+        },
+      },
+    },
   })
   check(
     @Param('reportId') reportId: string,
