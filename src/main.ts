@@ -11,8 +11,18 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    origin: (origin, callback) => {
+      const allowedOrigins = [process.env.FRONTEND_URL];
+
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'), false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   });
 
@@ -24,7 +34,6 @@ async function bootstrap() {
     }),
   );
 
-  // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle('Power BI Management API')
     .setDescription('API para gestão de relatórios e acessos ao Power BI')
