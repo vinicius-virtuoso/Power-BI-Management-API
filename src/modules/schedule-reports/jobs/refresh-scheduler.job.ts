@@ -1,4 +1,3 @@
-// src\modules\schedule-reports\jobs\refresh-scheduler.job.ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RefreshDatasetReportUseCase } from '../../refresh-dataset/use-cases/refresh-dataset-report.usecase';
@@ -15,10 +14,10 @@ export class RefreshSchedulerJob {
     private readonly findAllSchedules: FindAllScheduleUseCase,
     private readonly refreshDatasetUseCase: RefreshDatasetReportUseCase,
     @Inject(REPORTS_REPOSITORY)
-    private readonly reportsRepository: ReportsRepository, // Injetado para checar o estado atual do report
+    private readonly reportsRepository: ReportsRepository,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES, {
+  @Cron(CronExpression.EVERY_5_MINUTES, {
     name: 'Atualização de relatórios',
     timeZone: 'America/Sao_Paulo',
   })
@@ -32,7 +31,12 @@ export class RefreshSchedulerJob {
 
     const now = new Date();
     const currentDay = now.getDate().toString().padStart(2, '0') as ClosingDays;
-    const currentHour = now.getHours().toString().padStart(2, '0') as Hours;
+
+    const minutesSlot = (Math.floor(now.getMinutes() / 15) * 15)
+      .toString()
+      .padStart(2, '0');
+    const currentTimeSlot =
+      `${now.getHours().toString().padStart(2, '0')}:${minutesSlot}` as Hours;
 
     for (const schedule of schedulesResult.schedules) {
       if (!schedule.isActive) continue;
@@ -43,27 +47,24 @@ export class RefreshSchedulerJob {
         ? schedule.hoursClosingDays
         : schedule.hoursCommon;
 
-      if (targetHours.includes(currentHour)) {
+      if (targetHours.includes(currentTimeSlot)) {
         const report = await this.reportsRepository.findById(schedule.reportId);
 
         if (!report || !report.isActive) {
           this.logger.warn(
-            `Schedule skipped: Report ${schedule.reportId} is inactive or not found.`,
+            `Agendamento pulado: Relatório ${schedule.reportId} inativo ou não encontrado.`,
           );
           continue;
         }
 
-        if (report?.lastUpdate) {
+        if (report.lastUpdate) {
           const lastUpdate = new Date(report.lastUpdate);
+          const diffInMilliseconds = now.getTime() - lastUpdate.getTime();
+          const diffInMinutes = diffInMilliseconds / (1000 * 60);
 
-          const alreadyUpdatedThisHour =
-            lastUpdate.getHours() === now.getHours() &&
-            lastUpdate.getDate() === now.getDate() &&
-            lastUpdate.getMonth() === now.getMonth();
-
-          if (alreadyUpdatedThisHour) {
+          if (diffInMinutes < 29) {
             this.logger.warn(
-              `Job duplicado ignorado: Report ${report.name} já atualizado nesta hora.`,
+              `Job ignorado: Relatório ${report.name} já foi atualizado há ${Math.round(diffInMinutes)} minutos (limite de 29 min).`,
             );
             continue;
           }
@@ -80,8 +81,7 @@ export class RefreshSchedulerJob {
           });
         } catch (error) {
           this.logger.error(
-            `Erro ao atualizar report ${schedule.reportId}:`,
-            error.message,
+            `Erro ao atualizar relatório ${schedule.reportId}: ${error.message}`,
           );
         }
       }

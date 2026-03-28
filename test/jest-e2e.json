@@ -7,6 +7,11 @@
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
+  "setupFiles": ["dotenv/config"],
+  "globalSetup": "./setup.ts",
+  "globals": {
+    "dotenv": { "path": ".env.test" }
+  },
   "transform": {
     "^.+\\.(t|j)s$": [
       "ts-jest",

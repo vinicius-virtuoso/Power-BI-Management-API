@@ -30,9 +30,9 @@ import { USERS_REPOSITORY } from './users.providers';
     {
       provide: USERS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV !== 'test'
-          ? PrismaUsersRepository
-          : InMemoryUsersRepository,
+        process.env.NODE_ENV === 'local'
+          ? InMemoryUsersRepository
+          : PrismaUsersRepository,
     },
   ],
   exports: [USERS_REPOSITORY],

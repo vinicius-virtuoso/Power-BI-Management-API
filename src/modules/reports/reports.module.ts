@@ -30,9 +30,9 @@ import { SyncReportsPowerBIUseCase } from './use-cases/sync-reports-for-power-bi
     {
       provide: REPORTS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV !== 'test'
-          ? PrismaReportsRepository
-          : InMemoryReportsRepository,
+        process.env.NODE_ENV === 'local'
+          ? InMemoryReportsRepository
+          : PrismaReportsRepository,
     },
   ],
   exports: [REPORTS_REPOSITORY],

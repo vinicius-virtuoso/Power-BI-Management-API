@@ -1,12 +1,16 @@
-import { ScheduleReport, ScheduleReportCreate } from './schedule-report.entity';
+import {
+  Hours,
+  ScheduleReport,
+  ScheduleReportCreate,
+} from './schedule-report.entity';
 
 describe('ScheduleReport Entity', () => {
   const makeCreateData = (): ScheduleReportCreate => ({
     reportId: 'report-uuid',
-    hoursCommon: ['08', '12'],
+    hoursCommon: ['08:00', '12:00'],
     isClosingDays: true,
     closingDays: ['01', '31'],
-    hoursClosingDays: ['10', '22'],
+    hoursClosingDays: ['10:00', '22:00'],
   });
 
   it('deve criar uma nova instância de agendamento com status ativo por padrão', () => {
@@ -23,10 +27,10 @@ describe('ScheduleReport Entity', () => {
     const persistenceData = {
       id: 'existing-id',
       reportId: 'report-uuid',
-      hoursCommon: ['09'] as any,
+      hoursCommon: ['09:00'] as Hours[],
       isClosingDays: false,
       closingDays: [] as any,
-      hoursClosingDays: [] as any,
+      hoursClosingDays: [] as Hours[],
       isActive: false,
     };
 
@@ -58,7 +62,7 @@ describe('ScheduleReport Entity', () => {
 
   it('deve atualizar campos específicos e manter os outros valores originais', () => {
     const schedule = ScheduleReport.create(makeCreateData());
-    const newHours = ['23'] as any;
+    const newHours = ['23:00'] as Hours[];
 
     const updated = schedule.update({
       hoursCommon: newHours,
@@ -88,7 +92,7 @@ describe('ScheduleReport Entity', () => {
     const schedule = ScheduleReport.fromPersistence({
       id: '123',
       reportId: 'rep-1',
-      hoursCommon: ['01'],
+      hoursCommon: ['01:00'],
       isClosingDays: false,
       closingDays: [],
       hoursClosingDays: [],
@@ -100,7 +104,7 @@ describe('ScheduleReport Entity', () => {
     expect(view).toEqual({
       id: '123',
       reportId: 'rep-1',
-      hoursCommon: ['01'],
+      hoursCommon: ['01:00'],
       isClosingDays: false,
       closingDays: [],
       hoursClosingDays: [],

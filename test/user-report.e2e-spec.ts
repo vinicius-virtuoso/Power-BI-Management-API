@@ -9,6 +9,9 @@ describe('UserReportController (e2e)', () => {
   let prisma: PrismaService;
   let adminToken: string;
 
+  let userId: string;
+  let reportId: string;
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -34,39 +37,45 @@ describe('UserReportController (e2e)', () => {
     await app.close();
   });
 
+  beforeEach(async () => {
+    const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const user = await prisma.user.create({
+      data: {
+        name: 'User Atômico',
+        email: `user.${uniqueSuffix}@test.com`,
+        password: 'password123',
+        role: 'USER',
+      },
+    });
+
+    userId = user.id;
+
+    const report = await prisma.report.create({
+      data: {
+        externalId: `ext-${uniqueSuffix}`,
+        name: 'Relatório Atômico',
+        embedUrl: 'http://pbi.com',
+        webUrl: 'http://pbi.com',
+        datasetId: 'ds-1',
+        workspaceId: 'ws-1',
+        isActive: true,
+      },
+    });
+
+    reportId = report.id;
+  });
+
   describe('Fluxo Atômico de Vínculos', () => {
     it('deve realizar o ciclo completo de concessão, listagem e revogação sem interferência externa', async () => {
-      // 1. Criar dados únicos para este teste (evita conflitos de IDs e e-mails)
-      const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-      const user = await prisma.user.create({
-        data: {
-          name: 'User Atômico',
-          email: `user.${uniqueSuffix}@test.com`,
-          password: 'password123',
-          role: 'USER',
-        },
-      });
-
-      const report = await prisma.report.create({
-        data: {
-          externalId: `ext-${uniqueSuffix}`,
-          name: 'Relatório Atômico',
-          embedUrl: 'http://pbi.com',
-          webUrl: 'http://pbi.com',
-          datasetId: 'ds-1',
-          workspaceId: 'ws-1',
-          isActive: true,
-        },
-      });
-
       // 2. CONCEDER ACESSO (POST /share)
       const resGrant = await request(app.getHttpServer())
-        .post('/api/reports/share')
+        // URL Corrigida para /api/user-reports/share
+        .post('/api/user-reports/share')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userId: user.id,
-          reportId: report.id,
+          userId,
+          reportId,
         })
         .expect(201);
 
@@ -74,30 +83,32 @@ describe('UserReportController (e2e)', () => {
 
       // 3. VERIFICAR SE O RELATÓRIO APARECE NA LISTAGEM
       const resList = await request(app.getHttpServer())
-        .get(`/api/reports/user/${user.id}/reports`)
+        // URL Corrigida para /api/user-reports/user/:userId/reports
+        .get(`/api/user-reports/user/${userId}/reports`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(resList.body.total).toBeGreaterThan(0);
 
       // 4. REVOGAR ACESSO (DELETE /revoke)
-      // Agora envia userId + reportId — o backend localiza o vínculo internamente
       await request(app.getHttpServer())
-        .delete('/api/reports/revoke')
+        // URL Corrigida para /api/user-reports/revoke
+        .delete('/api/user-reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userId: user.id,
-          reportId: report.id,
+          userId,
+          reportId,
         })
         .expect(204);
 
       // 5. VERIFICAR SE REALMENTE FOI DELETADO (404 esperado na segunda revogação)
       await request(app.getHttpServer())
-        .delete('/api/reports/revoke')
+        // URL Corrigida para /api/user-reports/revoke
+        .delete('/api/user-reports/revoke')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          userId: user.id,
-          reportId: report.id,
+          userId,
+          reportId,
         })
         .expect(404);
     });

@@ -538,7 +538,7 @@ export class UsersController {
     return this.deactivateUserUseCase.execute(userId, loggedUser);
   }
 
-  @Delete(':userId')
+  @Delete('remove/:userId')
   @HttpCode(204)
   @ApiOperation({
     summary: 'Remove permanentemente um usuário',

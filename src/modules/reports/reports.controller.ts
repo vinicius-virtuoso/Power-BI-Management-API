@@ -76,7 +76,7 @@ export class ReportsController {
     return this.syncReportsPowerBIUseCase.execute(loggedUser);
   }
 
-  @Patch('activate/:reportId')
+  @Patch('report/activate/:reportId')
   @ApiOperation({ summary: 'Ativar um relatório' })
   @ApiParam({
     name: 'reportId',
@@ -117,7 +117,7 @@ export class ReportsController {
     return this.activateReportUseCase.execute(reportId, loggedUser);
   }
 
-  @Patch('deactivate/:reportId')
+  @Patch('report/deactivate/:reportId')
   @ApiOperation({ summary: 'Desativar um relatório' })
   @ApiParam({
     name: 'reportId',
@@ -158,7 +158,7 @@ export class ReportsController {
     return this.deactivateReportUseCase.execute(reportId, loggedUser);
   }
 
-  @Delete('report/:reportId')
+  @Delete('report/remove/:reportId')
   @HttpCode(204)
   @ApiOperation({ summary: 'Excluir um relatório permanentemente' })
   @ApiParam({

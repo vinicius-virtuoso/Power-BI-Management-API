@@ -55,7 +55,7 @@ import { GenerateTokenEmbedUseCase } from './use-case/generate-token-embed.useca
     },
   },
 })
-@Controller('reports')
+@Controller('user-reports')
 export class UserReportController {
   constructor(
     private readonly createUserReportUseCase: CreateUserReportUseCase,

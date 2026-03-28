@@ -4,11 +4,11 @@ export class ScheduleReportViewDto {
   @ApiProperty({ example: 'uuid-do-agendamento' })
   id: string;
 
-  @ApiProperty({ example: 'uuid-do-relatorio' })
+  @ApiProperty({ example: 'uuid-do-relatório' })
   reportId: string;
 
   @ApiProperty({
-    example: ['08', '12', '18'],
+    example: ['08:00', '12:00', '18:00'],
     description: 'Horas configuradas para dias comuns',
     isArray: true,
   })
@@ -28,7 +28,7 @@ export class ScheduleReportViewDto {
   closingDays: string[];
 
   @ApiProperty({
-    example: ['07', '19'],
+    example: ['07:30', '19:30'],
     description: 'Horas configuradas especificamente para dias de fechamento',
     isArray: true,
   })

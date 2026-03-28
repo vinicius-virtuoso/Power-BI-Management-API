@@ -28,6 +28,8 @@ CREATE TABLE "reports" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
+    "lastUpdate" TIMESTAMP(3),
+    "errors" TEXT,
 
     CONSTRAINT "reports_pkey" PRIMARY KEY ("id")
 );
@@ -41,6 +43,21 @@ CREATE TABLE "user_reports" (
     CONSTRAINT "user_reports_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "schedule_reports" (
+    "id" TEXT NOT NULL,
+    "reportId" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "hoursCommon" TEXT[],
+    "isClosingDays" BOOLEAN NOT NULL DEFAULT false,
+    "closingDays" TEXT[],
+    "hoursClosingDays" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "schedule_reports_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -50,8 +67,14 @@ CREATE UNIQUE INDEX "reports_externalId_key" ON "reports"("externalId");
 -- CreateIndex
 CREATE UNIQUE INDEX "user_reports_userId_reportId_key" ON "user_reports"("userId", "reportId");
 
--- AddForeignKey
-ALTER TABLE "user_reports" ADD CONSTRAINT "user_reports_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "schedule_reports_reportId_key" ON "schedule_reports"("reportId");
 
 -- AddForeignKey
-ALTER TABLE "user_reports" ADD CONSTRAINT "user_reports_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "reports"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_reports" ADD CONSTRAINT "user_reports_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_reports" ADD CONSTRAINT "user_reports_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "reports"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "schedule_reports" ADD CONSTRAINT "schedule_reports_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "reports"("id") ON DELETE CASCADE ON UPDATE CASCADE;

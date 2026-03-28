@@ -15,8 +15,8 @@ describe('RefreshSchedulerJob', () => {
     reportId: 'report-1',
     isActive: true,
     isClosingDays: false,
-    hoursCommon: ['09', '14'],
-    hoursClosingDays: ['18'],
+    hoursCommon: ['09:00', '14:00'],
+    hoursClosingDays: ['18:00'],
     closingDays: ['05'],
   };
 
@@ -84,7 +84,7 @@ describe('RefreshSchedulerJob', () => {
       ...mockSchedule,
       isClosingDays: true,
       closingDays: ['05'],
-      hoursClosingDays: ['18'],
+      hoursClosingDays: ['18:00'],
     };
 
     findAllSchedules.execute.mockResolvedValue({
@@ -105,8 +105,8 @@ describe('RefreshSchedulerJob', () => {
     });
   });
 
-  it('deve ignorar o disparo se a última atualização foi na mesma hora', async () => {
-    const fakeNow = new Date(2026, 0, 1, 9, 30, 0);
+  it('deve ignorar o disparo se a última atualização foi no mesmo slot (HH:mm)', async () => {
+    const fakeNow = new Date(2026, 0, 1, 9, 0, 0);
     jest.useFakeTimers().setSystemTime(fakeNow);
 
     findAllSchedules.execute.mockResolvedValue({
@@ -116,12 +116,39 @@ describe('RefreshSchedulerJob', () => {
     reportsRepository.findById.mockResolvedValue({
       id: 'report-1',
       isActive: true,
-      lastUpdate: new Date(2026, 0, 1, 9, 5, 0), // Mesma hora (09)
+      lastUpdate: new Date(2026, 0, 1, 9, 0, 0),
     });
 
     await job.handleRefreshAggregation();
 
     expect(refreshDatasetUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('deve disparar no slot :30 quando o horário estiver agendado', async () => {
+    const fakeNow = new Date(2026, 0, 1, 9, 30, 0);
+    jest.useFakeTimers().setSystemTime(fakeNow);
+
+    const halfHourSchedule = {
+      ...mockSchedule,
+      hoursCommon: ['09:30'],
+    };
+
+    findAllSchedules.execute.mockResolvedValue({
+      schedules: [halfHourSchedule],
+    } as any);
+
+    reportsRepository.findById.mockResolvedValue({
+      id: 'report-1',
+      isActive: true,
+      lastUpdate: new Date(2026, 0, 1, 8, 0, 0),
+    });
+
+    await job.handleRefreshAggregation();
+
+    expect(refreshDatasetUseCase.execute).toHaveBeenCalledWith('report-1', {
+      id: 'system-cron',
+      role: 'ADMIN',
+    });
   });
   it('deve ignorar o agendamento se o relatório estiver desativado no repositório', async () => {
     const fakeNow = new Date(2026, 0, 1, 9, 0, 0);
@@ -174,8 +201,9 @@ describe('RefreshSchedulerJob', () => {
     await job.handleRefreshAggregation();
 
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Erro ao atualizar report report-1:'),
-      'API Offline',
+      expect.stringContaining(
+        'Erro ao atualizar relatório report-1: API Offline',
+      ),
     );
   });
 
@@ -210,7 +238,7 @@ describe('RefreshSchedulerJob', () => {
 
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Schedule skipped: Report report-1 is inactive or not found.',
+        'Agendamento pulado: Relatório report-1 inativo ou não encontrado.',
       ),
     );
     expect(refreshDatasetUseCase.execute).not.toHaveBeenCalled();

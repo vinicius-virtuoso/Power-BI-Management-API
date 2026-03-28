@@ -50,7 +50,7 @@ describe('ScheduleReportsController', () => {
     it('deve chamar o CreateScheduleUseCase com os parâmetros corretos', async () => {
       const dto: CreateScheduleReportDto = {
         reportId: 'rep-1',
-        hoursCommon: ['08'] as any,
+        hoursCommon: ['08:00'] as any[],
         isClosingDays: false,
         closingDays: [],
         hoursClosingDays: [],

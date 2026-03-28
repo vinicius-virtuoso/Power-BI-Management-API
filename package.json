@@ -11,14 +11,14 @@
     "start": "cross-env NODE_ENV=production nest start",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "cross-env NODE_ENV=development nest start --debug --watch",
-    "start:prod": "cross-env NODE_ENV=production node dist/src/main",
+    "start:prod": "dotenv -e .env.local node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "cross-env NODE_ENV=development jest --runInBand",
-    "test:watch": "cross-env NODE_ENV=development jest --watch --runInBand",
-    "test:cov": "cross-env NODE_ENV=development jest --coverage --runInBand",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --runInBand",
-    "test:e2e:watch": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --watch"
+    "test": "dotenv -e .env.local -- jest",
+    "test:watch": "dotenv -e .env.local -- jest --watch",
+    "test:cov": "dotenv -e .env.local -- jest --coverage --runInBand",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest",
+    "test:e2e": "dotenv -e .env.test -- jest --config test/jest-e2e.json --runInBand",
+    "test:e2e:watch": "dotenv -e .env.test -- jest --config test/jest-e2e.json --runInBand --watch"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
@@ -56,6 +56,7 @@
     "@types/pg": "^8.16.0",
     "@types/supertest": "^6.0.2",
     "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -96,7 +97,9 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
-      "src/lib/prisma.ts"
+      "src/lib/prisma.ts",
+      "/prisma",
+      "generated"
     ]
   }
 }

@@ -192,7 +192,7 @@ describe('UsersController (e2e)', () => {
 
     it('deve deletar o usuário e retornar 404 na busca', async () => {
       await request(app.getHttpServer())
-        .delete(`/api/users/${targetId}`)
+        .delete(`/api/users/remove/${targetId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(204);
 

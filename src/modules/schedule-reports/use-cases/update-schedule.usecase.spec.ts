@@ -14,10 +14,10 @@ describe('UpdateScheduleUseCase', () => {
   const scheduleId = 'schedule-uuid';
 
   const mockUpdateDto = {
-    hoursCommon: ['10', '15'],
+    hoursCommon: ['10:00', '15:00'],
     isClosingDays: true,
     closingDays: ['10'],
-    hoursClosingDays: ['20'],
+    hoursClosingDays: ['20:00'],
   };
 
   beforeEach(() => {

@@ -44,6 +44,22 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  const server = app.getHttpServer();
+  const router = server._events.request._router;
+
+  if (router && router.stack) {
+    console.log('--- ROTAS REGISTRADAS NO NESTJS ---');
+    router.stack.forEach((layer: any) => {
+      if (layer.route) {
+        const methods = Object.keys(layer.route.methods)
+          .join(', ')
+          .toUpperCase();
+        console.log(`${methods} -> ${layer.route.path}`);
+      }
+    });
+    console.log('----------------------------------');
+  }
+
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 }

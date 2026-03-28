@@ -20,7 +20,7 @@ export class RefreshStatusSyncJob {
     timeZone: 'America/Sao_Paulo',
   })
   async handleStatusSync() {
-    this.logger.log('Syncing active report statuses...');
+    this.logger.log('Sincronizando status de relatórios ativos...');
 
     const reports = await this.reportsRepository.findAllActive();
 
@@ -32,7 +32,7 @@ export class RefreshStatusSyncJob {
         });
       } catch (error) {
         this.logger.error(
-          `Error syncing report ${report.id}: ${error.message}`,
+          `Erro ao sincronizar relatório ${report.id}: ${error.message}`,
         );
       }
     }

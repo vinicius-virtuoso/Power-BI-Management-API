@@ -87,15 +87,14 @@ describe('ReportsController (e2e)', () => {
 
     it('deve desativar um relatório manualmente', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/api/reports/deactivate/${reportId}`)
+        // URL Corrigida: /api/reports/report/deactivate/:id
+        .patch(`/api/reports/report/deactivate/${reportId}`)
         .set('Authorization', `Bearer ${accessToken}`);
 
       if (response.status === 404) {
-        console.error('Debug 404 - Body:', response.body);
         const exists = await prisma.report.findUnique({
           where: { id: reportId },
         });
-        console.error('Existe no banco?', !!exists);
       }
 
       expect(response.status).toBe(200);
@@ -109,7 +108,8 @@ describe('ReportsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .patch(`/api/reports/activate/${reportId}`)
+        // URL Corrigida: /api/reports/report/activate/:id
+        .patch(`/api/reports/report/activate/${reportId}`)
         .set('Authorization', `Bearer ${accessToken}`);
 
       expect(response.status).toBe(200);
@@ -121,7 +121,6 @@ describe('ReportsController (e2e)', () => {
     let reportId: string;
 
     beforeEach(async () => {
-      // Cria um relatório específico para ser deletado
       const report = await prisma.report.create({
         data: {
           externalId: `delete-${Date.now()}`,
@@ -137,13 +136,12 @@ describe('ReportsController (e2e)', () => {
     });
 
     it('deve excluir um relatório permanentemente quando ADMIN', async () => {
-      // Realiza a exclusão
       await request(app.getHttpServer())
-        .delete(`/api/reports/report/${reportId}`)
+        // URL Corrigida: /api/reports/report/remove/:id
+        .delete(`/api/reports/report/remove/${reportId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(204);
 
-      // Verifica se o relatório realmente sumiu do banco
       const exists = await prisma.report.findUnique({
         where: { id: reportId },
       });
@@ -154,7 +152,8 @@ describe('ReportsController (e2e)', () => {
       const fakeId = '00000000-0000-0000-0000-000000000000';
 
       await request(app.getHttpServer())
-        .delete(`/api/reports/report/${fakeId}`)
+        // URL Corrigida: /api/reports/report/remove/:id
+        .delete(`/api/reports/report/remove/${fakeId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(404);
     });

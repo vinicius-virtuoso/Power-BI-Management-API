@@ -15,10 +15,7 @@ import { FindByReportIdUseCase } from './use-cases/find-by-report-id.usecase';
 import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
 
 @Module({
-  imports: [
-    RefreshDatasetModule, // ADICIONE ISSO AQUI
-    ReportsModule,
-  ],
+  imports: [RefreshDatasetModule, ReportsModule],
   controllers: [ScheduleReportsController],
   providers: [
     RefreshSchedulerJob,
@@ -32,9 +29,9 @@ import { UpdateScheduleUseCase } from './use-cases/update-schedule.usecase';
     {
       provide: SCHEDULE_REPORTS_REPOSITORY,
       useClass:
-        process.env.NODE_ENV !== 'test'
-          ? PrismaScheduleReportsRepository
-          : InMemoryScheduleReportsRepository,
+        process.env.NODE_ENV === 'local'
+          ? InMemoryScheduleReportsRepository
+          : PrismaScheduleReportsRepository,
     },
   ],
 })

@@ -77,7 +77,7 @@ describe('RefreshStatusSyncJob', () => {
     expect(checkStatusUseCase.execute).toHaveBeenCalledTimes(2);
     expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Error syncing report report-1: Power BI API error',
+        'Erro ao sincronizar relatório report-1: Power BI API error',
       ),
     );
   });
