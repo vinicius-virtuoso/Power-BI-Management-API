@@ -71,7 +71,7 @@ export class RefreshSchedulerJob {
         }
 
         this.logger.log(
-          `Iniciando atualização automática: Report ${schedule.reportId}`,
+          `Iniciando atualização automática: Relatório ${report.name}`,
         );
 
         try {
