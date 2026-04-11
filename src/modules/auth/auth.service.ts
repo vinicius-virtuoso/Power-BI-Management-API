@@ -11,6 +11,7 @@ export type AuthServiceProps = {
 
 export type AuthServiceResponse = {
   access_token: string;
+  user: { name: string; email: string };
 };
 
 @Injectable()
@@ -46,8 +47,12 @@ export class AuthService {
     await this.usersRepository.update(userFound.updateLastAccess());
 
     const access_token = await this.jwtService.signAsync(payload);
+
+    const { name, email } = userFound.toView();
+
     return {
       access_token,
+      user: { name, email },
     };
   }
 }

@@ -14,14 +14,23 @@ describe('AuthService', () => {
   let jwtService: JwtService;
 
   // Criamos um usuário de exemplo que simula a sua Entidade
+  const mockUserToViewResult = {
+    id: '1',
+    email: 'vini@example.com',
+    name: 'vini',
+    role: 'admin',
+    isActive: true,
+  };
+
   const mockUser = {
     id: '1',
+    name: 'vini',
     email: 'vini@example.com',
     password: 'hashed_password',
     role: 'admin',
     isActive: true,
-    // Simulamos o método que você chamou no seu código
     updateLastAccess: jest.fn().mockReturnThis(),
+    toView: jest.fn().mockReturnValue(mockUserToViewResult),
   };
 
   beforeEach(async () => {
@@ -63,7 +72,14 @@ describe('AuthService', () => {
         password: 'password123',
       });
 
-      expect(result).toEqual({ access_token: 'token_valido' });
+      expect(result).toEqual({
+        access_token: 'token_valido',
+        user: {
+          name: mockUserToViewResult.name,
+          email: mockUserToViewResult.email,
+        },
+      });
+      expect(mockUser.toView).toHaveBeenCalled();
       expect(usersRepository.update).toHaveBeenCalled();
       expect(jwtService.signAsync).toHaveBeenCalledWith({
         id: mockUser.id,

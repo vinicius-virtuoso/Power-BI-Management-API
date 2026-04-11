@@ -9,6 +9,15 @@ describe('AuthController', () => {
 
   const mockAuthResponse = {
     access_token: 'token_gerado_com_sucesso',
+    user: {
+      id: '1',
+      name: 'vini',
+      email: 'vini@example.com',
+      role: 'admin',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
   };
 
   beforeEach(async () => {
