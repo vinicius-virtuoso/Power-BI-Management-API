@@ -27,6 +27,7 @@ export class RefreshSchedulerJob {
     const schedulesResult = await this.findAllSchedules.execute({
       id: 'system-cron',
       role: 'ADMIN',
+      email: 'system-cron@example.com',
     });
 
     const now = new Date();
@@ -78,6 +79,7 @@ export class RefreshSchedulerJob {
           await this.refreshDatasetUseCase.execute(schedule.reportId, {
             id: 'system-cron',
             role: 'ADMIN',
+            email: 'system-cron@example.com',
           });
         } catch (error) {
           this.logger.error(

@@ -53,11 +53,12 @@ describe('FindOneUserReportUseCase', () => {
     const result = await useCase.execute('report-id', {
       id: 'user-id',
       role: 'USER',
+      email: 'user@dimas.com.br',
     });
 
     expect(reportAccessService.validateAccess).toHaveBeenCalledWith(
       'report-id',
-      { id: 'user-id', role: 'USER' },
+      { id: 'user-id', role: 'USER', email: 'user@dimas.com.br' },
     );
 
     expect(powerBiRepository.authenticate).toHaveBeenCalled();
@@ -66,6 +67,7 @@ describe('FindOneUserReportUseCase', () => {
       accessToken.access_token,
       reportView.externalId,
     );
+    expect(powerBiRepository.generateEmbedToken).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual({
       ...reportView,
@@ -85,11 +87,69 @@ describe('FindOneUserReportUseCase', () => {
     const promise = useCase.execute('report-id', {
       id: 'user-id',
       role: 'USER',
+      email: 'user@dimas.com.br',
     });
 
     await expect(promise).rejects.toThrow(UnauthorizedException);
     await expect(promise).rejects.toThrow(
       'Falha na autenticação com o Power BI: 401',
     );
+  });
+
+  it('deve tentar novamente com identity quando GenerateToken retornar 400', async () => {
+    const reportView: ReportView = {
+      id: 'report-id',
+      name: 'Relatório Power BI',
+      isActive: true,
+      externalId: 'external-report-id',
+      embedUrl: 'https://embed.url',
+      datasetId: 'datasetId-2',
+      webUrl: 'webUrl-2',
+      workspaceId: 'workspaceId-1',
+      lastUpdate: null,
+      errors: null,
+    };
+
+    const accessToken = { access_token: 'power-bi-access-token' };
+    const embedToken = {
+      token: 'embed-token',
+      expiration: '2026-01-01T00:00:00Z',
+    };
+
+    reportAccessService.validateAccess.mockResolvedValue(reportView);
+    powerBiRepository.authenticate.mockResolvedValue(accessToken);
+    powerBiRepository.generateEmbedToken
+      .mockResolvedValueOnce({ statusCode: 400 })
+      .mockResolvedValueOnce(embedToken);
+
+    const loggedUser = {
+      id: 'user-id',
+      role: 'USER',
+      email: 'user@dimas.com.br',
+    };
+
+    const result = await useCase.execute('report-id', loggedUser as any);
+
+    expect(powerBiRepository.generateEmbedToken).toHaveBeenNthCalledWith(
+      1,
+      accessToken.access_token,
+      reportView.externalId,
+    );
+    expect(powerBiRepository.generateEmbedToken).toHaveBeenNthCalledWith(
+      2,
+      accessToken.access_token,
+      reportView.externalId,
+      [
+        {
+          username: loggedUser.email,
+          roles: ['FilialRole'],
+          datasets: [reportView.datasetId],
+        },
+      ],
+    );
+    expect(result).toEqual({
+      ...reportView,
+      ...embedToken,
+    });
   });
 });

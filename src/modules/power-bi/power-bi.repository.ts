@@ -1,5 +1,6 @@
 import type {
   AzureTokenResponse,
+  EffectiveIdentity,
   PowerBiEmbedTokenResponse,
   PowerBiGetLatestRefreshStatusResponse,
   PowerBiReportResponse,
@@ -11,6 +12,7 @@ export interface PowerBiRepository {
   generateEmbedToken(
     accessToken: string,
     reportId: string,
+    effectiveIdentity?: EffectiveIdentity[],
   ): Promise<PowerBiEmbedTokenResponse>;
   triggerDatasetRefresh(
     token: string,

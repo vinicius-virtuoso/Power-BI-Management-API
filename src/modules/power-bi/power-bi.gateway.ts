@@ -6,6 +6,7 @@ import {
   PowerBiEmbedTokenResponse,
   type AzureToken,
   type AzureTokenResponse,
+  type EffectiveIdentity,
   type GetPowerBiGetLatestRefreshStatus,
   type PowerBiEmbedToken,
   type PowerBiGetLatestRefreshStatusResponse,
@@ -39,10 +40,15 @@ export class PowerBiGateway implements PowerBiRepository {
       };
     } catch (error) {
       if (error.response) {
+        console.error('Power BI GenerateToken error:', {
+          status: error.response.status,
+          data: error.response.data,
+        });
         return {
           statusCode: error.response.status as number,
         };
       }
+      console.error('Power BI GenerateToken unexpected error:', error);
       return {
         statusCode: 500,
       };
@@ -73,20 +79,25 @@ export class PowerBiGateway implements PowerBiRepository {
   async generateEmbedToken(
     token: string,
     reportId: string,
+    effectiveIdentity?: EffectiveIdentity[],
   ): Promise<PowerBiEmbedTokenResponse> {
     const url = `${process.env.POWER_BI_API_URL}/${process.env.POWER_BI_WORKSPACE_ID}/reports/${reportId}/GenerateToken`;
 
     try {
+      const body: Record<string, unknown> = { accessLevel: 'View' };
+
+      if (effectiveIdentity) {
+        body.identities = effectiveIdentity;
+      }
+
+      console.log('Body enviado ao Power BI:', JSON.stringify(body, null, 2));
+
       const { data } = await firstValueFrom(
-        this.http.post<PowerBiEmbedToken>(
-          url,
-          { accessLevel: 'View' },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        this.http.post<PowerBiEmbedToken>(url, body, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        ),
+        }),
       );
 
       return {

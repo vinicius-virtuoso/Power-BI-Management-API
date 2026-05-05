@@ -73,6 +73,7 @@ describe('RefreshSchedulerJob', () => {
     expect(refreshDatasetUseCase.execute).toHaveBeenCalledWith('report-1', {
       id: 'system-cron',
       role: 'ADMIN',
+      email: 'system-cron@example.com',
     });
   });
 
@@ -102,6 +103,7 @@ describe('RefreshSchedulerJob', () => {
     expect(refreshDatasetUseCase.execute).toHaveBeenCalledWith('report-1', {
       id: 'system-cron',
       role: 'ADMIN',
+      email: 'system-cron@example.com',
     });
   });
 
@@ -148,6 +150,7 @@ describe('RefreshSchedulerJob', () => {
     expect(refreshDatasetUseCase.execute).toHaveBeenCalledWith('report-1', {
       id: 'system-cron',
       role: 'ADMIN',
+      email: 'system-cron@example.com',
     });
   });
   it('deve ignorar o agendamento se o relatório estiver desativado no repositório', async () => {

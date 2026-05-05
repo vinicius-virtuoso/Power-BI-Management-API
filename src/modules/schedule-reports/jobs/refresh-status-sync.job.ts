@@ -29,6 +29,7 @@ export class RefreshStatusSyncJob {
         await this.checkStatusUseCase.execute(report.id, {
           id: 'system-sync',
           role: 'ADMIN',
+          email: 'system-sync@example.com',
         });
       } catch (error) {
         this.logger.error(

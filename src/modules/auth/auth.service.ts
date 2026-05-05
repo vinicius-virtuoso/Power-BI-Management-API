@@ -42,6 +42,7 @@ export class AuthService {
     const payload = {
       id: userFound.id,
       role: userFound.role,
+      email: userFound.email,
     };
 
     await this.usersRepository.update(userFound.updateLastAccess());

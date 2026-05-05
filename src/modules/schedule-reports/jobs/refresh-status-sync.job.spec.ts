@@ -56,10 +56,12 @@ describe('RefreshStatusSyncJob', () => {
     expect(checkStatusUseCase.execute).toHaveBeenCalledWith('report-1', {
       id: 'system-sync',
       role: 'ADMIN',
+      email: 'system-sync@example.com',
     });
     expect(checkStatusUseCase.execute).toHaveBeenCalledWith('report-2', {
       id: 'system-sync',
       role: 'ADMIN',
+      email: 'system-sync@example.com',
     });
   });
 

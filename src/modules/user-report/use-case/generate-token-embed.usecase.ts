@@ -31,9 +31,33 @@ export class GenerateTokenEmbedUseCase {
       );
     }
 
-    return this.powerBiRepository.generateEmbedToken(
+    const isAdmin = String(loggedUser.role).toUpperCase() === 'ADMIN';
+
+    let embedConfig = await this.powerBiRepository.generateEmbedToken(
       powerBiToken.access_token,
       report.externalId,
     );
+
+    if ('statusCode' in embedConfig && embedConfig.statusCode === 400) {
+      const fallbackIdentity = [
+        {
+          username: loggedUser.email ?? '',
+          roles: [isAdmin ? 'AdminRole' : 'FilialRole'],
+          datasets: [report.datasetId],
+        },
+      ];
+
+      embedConfig = await this.powerBiRepository.generateEmbedToken(
+        powerBiToken.access_token,
+        report.externalId,
+        fallbackIdentity,
+      );
+    }
+
+    console.log('embedConfig:', embedConfig);
+
+    return {
+      ...embedConfig,
+    };
   }
 }

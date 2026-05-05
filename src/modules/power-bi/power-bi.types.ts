@@ -30,6 +30,12 @@ export interface PowerBiListReports {
 
 export type PowerBiListReportsResponse = PowerBiListReports | PowerBiStatusCode;
 
+export interface EffectiveIdentity {
+  username: string;
+  roles: string[];
+  datasets: string[];
+}
+
 export interface PowerBiEmbedToken {
   token: string;
   expiration: string;
