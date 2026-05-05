@@ -12,18 +12,33 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = [process.env.FRONTEND_URL];
+      // Defina explicitamente as origens permitidas ou puxe do .env
+      const allowedOrigins = [
+        process.env.FRONTEND_URL, // Ex: http://172.17.1.7
+        'http://172.17.1.7', // IP do servidor privado
+        'http://168.138.126.80:8085', // IP do servidor publico
+        'http://localhost:3000', // Porta padrão do Next.js local
+        'http://localhost:3005', // Sua porta mapeada no Docker
+      ].filter(Boolean); // Remove valores nulos/undefined
 
+      // Permite requisições sem origin (como ferramentas de mobile ou Postman)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Verifica se a origem está na lista (removendo barras extras no final)
+      const isAllowed = allowedOrigins.some(
+        (allowed) => origin.replace(/\/$/, '') === allowed.replace(/\/$/, ''),
+      );
+
+      if (isAllowed) {
         return callback(null, true);
       }
 
+      console.log(`CORS bloqueou a origem: ${origin}`); // Log para debug no Docker
       return callback(new Error('Not allowed by CORS'), false);
     },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // OPTIONS é vital para Preflight
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'set-cookie'],
   });
 
   app.useGlobalPipes(
